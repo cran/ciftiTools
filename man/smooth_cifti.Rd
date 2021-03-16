@@ -4,102 +4,105 @@
 \alias{smooth_cifti}
 \alias{smoothCIfTI}
 \alias{smoothcii}
+\alias{smooth_xifti}
 \title{Smooth a CIFTI}
 \usage{
 smooth_cifti(
   x,
   cifti_target_fname = NULL,
-  surface_sigma,
-  volume_sigma,
+  surf_FWHM = 5,
+  vol_FWHM = 5,
   surfL_fname = NULL,
   surfR_fname = NULL,
   cerebellum_fname = NULL,
   subcortical_zeroes_as_NA = FALSE,
   cortical_zeroes_as_NA = FALSE,
-  subcortical_merged = FALSE,
-  wb_path = NULL
+  subcortical_merged = FALSE
 )
 
 smoothCIfTI(
   x,
-  cifti_target_fname,
-  surface_sigma,
-  volume_sigma,
+  cifti_target_fname = NULL,
+  surf_FWHM = 5,
+  vol_FWHM = 5,
   surfL_fname = NULL,
   surfR_fname = NULL,
   cerebellum_fname = NULL,
   subcortical_zeroes_as_NA = FALSE,
   cortical_zeroes_as_NA = FALSE,
-  subcortical_merged = FALSE,
-  wb_path = NULL
+  subcortical_merged = FALSE
 )
 
 smoothcii(
   x,
-  cifti_target_fname,
-  surface_sigma,
-  volume_sigma,
+  cifti_target_fname = NULL,
+  surf_FWHM = 5,
+  vol_FWHM = 5,
   surfL_fname = NULL,
   surfR_fname = NULL,
   cerebellum_fname = NULL,
   subcortical_zeroes_as_NA = FALSE,
   cortical_zeroes_as_NA = FALSE,
-  subcortical_merged = FALSE,
-  wb_path = NULL
+  subcortical_merged = FALSE
+)
+
+smooth_xifti(
+  x,
+  cifti_target_fname = NULL,
+  surf_FWHM = 5,
+  vol_FWHM = 5,
+  surfL_fname = NULL,
+  surfR_fname = NULL,
+  cerebellum_fname = NULL,
+  subcortical_zeroes_as_NA = FALSE,
+  cortical_zeroes_as_NA = FALSE,
+  subcortical_merged = FALSE
 )
 }
 \arguments{
-\item{x}{The \code{"xifti"} object or CIFTI file to smooth.}
+\item{x}{The CIFTI file name or \code{"xifti"} object to resample.}
 
-\item{cifti_target_fname}{The file name to save the smoothed CIFTI. If
-\code{NULL}, will be set to a file in a temporary directory.}
+\item{cifti_target_fname}{File name for the smoothed CIFTI. If
+\code{NULL}, will be written to "smoothed.d*.nii" in the current working
+directory if \code{x} was a CIFTI file, and in a temporary directory if
+\code{x} was a \code{"xifti"} object.}
 
-\item{surface_sigma}{The sigma for the gaussian surface smoothing kernel, in mm}
+\item{surf_FWHM, vol_FWHM}{The full width at half maximum (FWHM) parameter
+for the gaussian surface or volume smoothing kernel, in mm. Default: \code{5}}
 
-\item{volume_sigma}{The sigma for the gaussian volume smoothing kernel, in mm}
+\item{surfL_fname, surfR_fname}{(Required if the corresponding cortex is
+present) Surface GIFTI files for the left and right cortical surfaces}
 
-\item{surfL_fname, surfR_fname}{(Required if the 
-corresponding cortex is present) Surface GIFTI files for the left and right
-cortical surface}
+\item{cerebellum_fname}{(Optional) Surface GIFTI file for the cerebellar surface}
 
-\item{cerebellum_fname}{(Optional) Surface GIFTI file for the 
-cerebellar surface}
-
-\item{subcortical_zeroes_as_NA, cortical_zeroes_as_NA}{Should zero-values in 
+\item{subcortical_zeroes_as_NA, cortical_zeroes_as_NA}{Should zero-values in
 the subcortical volume or cortex be treated as NA? Default: \code{FALSE}.}
 
 \item{subcortical_merged}{Smooth across subcortical structure boundaries?
 Default: \code{FALSE}.}
-
-\item{wb_path}{(Optional) Path to Connectome Workbench folder or executable. 
-If not provided, should be set with 
-\code{ciftiTools.setOption("wb_path", "path/to/workbench")}.}
 }
 \value{
 The \code{cifti_target_fname}, invisibly
 }
 \description{
-Smooth CIFTI data. This uses the \code{-cifti-smoothing} command 
- from Connectome Workbench.
+Smooth CIFTI data. This uses the \code{-cifti-smoothing} command
+from Connectome Workbench.
 }
 \details{
 If the CIFTI is a ".dlabel" file (intent 3007), then it will be converted
- to a ".dscalar" file because the values will no longer be integer indices.
- Unless the label values were ordinal, this is probably not desired so a
- warning will be printed.
+to a ".dscalar" file because the values will no longer be integer indices.
+Unless the label values were ordinal, this is probably not desired so a
+warning will be printed.
 
- The input can also be a \code{"xifti"} object.
+Can accept a \code{"xifti"} object as well as a path to a CIFTI-file.
 
- Surfaces are required for each hemisphere in the CIFTI. If they are not provided,
- the inflated surfaces included in \code{"ciftiTools"} will be used.
+Surfaces are required for each hemisphere in the CIFTI. If they are not provided,
+the inflated surfaces included in \code{"ciftiTools"} will be used.
 }
 \section{Connectome Workbench Requirement}{
 
- This function uses a system wrapper for the 'wb_command' executable. The 
- user must first download and install the Connectome Workbench, available 
- from https://www.humanconnectome.org/software/get-connectome-workbench . 
- The \code{wb_path} argument is the full file path to the Connectome 
- Workbench folder. (The full file path to the 'wb_cmd' executable also 
- works.)
+This function uses a system wrapper for the 'wb_command' executable. The
+user must first download and install the Connectome Workbench, available
+from https://www.humanconnectome.org/software/get-connectome-workbench .
 }
 

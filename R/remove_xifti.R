@@ -10,7 +10,7 @@
 #' 
 #' @return The new \code{"xifti"} with the requested components removed
 #' 
-#' @keywords internal
+#' @export
 #' 
 remove_xifti <- function(xifti, remove=NULL){
   if (is.null(remove)) { stop("Must specify which components to `remove`.") }
@@ -42,6 +42,6 @@ remove_xifti <- function(xifti, remove=NULL){
     xifti$surf["cortex_right"] <- list(NULL)
   }
 
-  stopifnot(is.xifti(xifti))
+  if (!is.xifti(xifti)) { stop("Could not make a valid \"xifti\" object.") }
   xifti
 }

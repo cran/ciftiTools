@@ -53,7 +53,14 @@ is.xifti_data <- function(x) {
 
   # Non-empty entries should be numeric matrices.
   not_null <- names(x)[!vapply(x, is.null, FALSE)]
-  for (ii in not_null) { if (!is.nummat(x[[ii]])) { return(FALSE) } }
+  for (ii in not_null) { 
+    if (!is.nummat(x[[ii]])) {
+      message(
+        "`xifti` data can be coerced to numeric matrices using `fix_xifti`.\n"
+      )
+      return(FALSE)
+    } 
+  }
 
   if (!is.null(x$cortex_left) && nrow(x$cortex_left) > 200000) {
     warning("The left cortex has over 200,000 vertices. Is this a mistake?")
@@ -244,24 +251,26 @@ is.xifti_meta <- function(x) {
     if (!is.logical(x$cortex$medial_wall_mask$left)) {
       message("Left cortex medial wall mask must be logical.\n"); return(FALSE)
     }
+    # [TO DO]: Cleanup.
     if (mean(x$cortex$medial_wall_mask$left) < .5) {
-      message(paste(
+      warning(paste(
         "Warning: FALSE values in left medial wall mask should indicate",
         "the medial wall vertices. But, there were more FALSE values than TRUE."
       ))
-      return(FALSE)
+      #return(FALSE)
     }
   }
   if (!is.null(x$cortex$medial_wall_mask$right)) {
     if (!is.logical(x$cortex$medial_wall_mask$right)) {
       message("Right cortex medial wall mask must be logical.\n"); return(FALSE)
     }
+    # [TO DO]: Cleanup.
     if (mean(x$cortex$medial_wall_mask$right) < .5) {
-      message(paste(
+      warning(paste(
         "Warning: FALSE values in right medial wall mask should indicate",
         "the medial wall vertices. But, there were more FALSE values than TRUE."
       ))
-      return(FALSE)
+      #return(FALSE)
     }
   }
   if ((!is.null(x$cortex$medial_wall_mask$left)) && !is.null(x$cortex$medial_wall_mask$right)) {
@@ -510,18 +519,51 @@ is.xifti <- function(x, messages=TRUE) {
         return(FALSE)
       }
 
-      for (ii in seq_len(ncol(x$data$cortex_left))) {
-        all_labels <- unique(data_mat[,ii])
-        valid_label <- all_labels %in% x$meta$cifti$labels[[ii]]$Key
-        if (!all(valid_label)) {
-          message(paste(
-            "These label values in data column", ii, 
-            "are not in the corresponding label table:\n\t",
-            paste(all_labels[!valid_label], collapse=", "), "\n"
-          ))
-          return(FALSE)
+      if (!is.null(x$data$cortex_left)) {
+        for (ii in seq_len(ncol(x$data$cortex_left))) {
+          all_labels <- unique(data_mat[,ii])
+          valid_label <- all_labels %in% x$meta$cifti$labels[[ii]]$Key
+          if (!all(valid_label)) {
+            message(paste(
+              "These label values in the left cortex data column", ii, 
+              "are not in the corresponding label table:\n\t",
+              paste(all_labels[!valid_label], collapse=", "), "\n"
+            ))
+            return(FALSE)
+          }
         }
       }
+
+      if (!is.null(x$data$cortex_right)) {
+        for (ii in seq_len(ncol(x$data$cortex_right))) {
+          all_labels <- unique(data_mat[,ii])
+          valid_label <- all_labels %in% x$meta$cifti$labels[[ii]]$Key
+          if (!all(valid_label)) {
+            message(paste(
+              "These label values in the right cortex data column", ii, 
+              "are not in the corresponding label table:\n\t",
+              paste(all_labels[!valid_label], collapse=", "), "\n"
+            ))
+            return(FALSE)
+          }
+        }
+      }
+
+      if (!is.null(x$data$subcort)) {
+        for (ii in seq_len(ncol(x$data$subcort))) {
+          all_labels <- unique(data_mat[,ii])
+          valid_label <- all_labels %in% x$meta$cifti$labels[[ii]]$Key
+          if (!all(valid_label)) {
+            message(paste(
+              "These label values in the subcortex data column", ii, 
+              "are not in the corresponding label table:\n\t",
+              paste(all_labels[!valid_label], collapse=", "), "\n"
+            ))
+            return(FALSE)
+          }
+        }
+      }
+
     }
   }
 

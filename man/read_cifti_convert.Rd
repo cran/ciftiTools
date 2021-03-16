@@ -10,7 +10,6 @@ read_cifti_convert(
   surfR_fname = NULL,
   brainstructures = c("left", "right"),
   mwall_values = c(NA, NaN),
-  wb_path = NULL,
   verbose = FALSE,
   ...
 )
@@ -24,18 +23,14 @@ file representing the left cortex.}
 \item{surfR_fname}{(Optional) File path of GIFTI surface geometry
 file representing the right cortex.}
 
-\item{brainstructures}{Character vector indicating which brain structure(s) 
- to obtain: \code{"left"} (left cortical surface), \code{"right"} (right 
- cortical surface) and/or \code{"subcortical"} (subcortical and cerebellar
- gray matter). Can also be \code{"all"} (obtain all three brain structures). 
- Default: \code{c("left","right")} (cortical surface only).
+\item{brainstructures}{Character vector indicating which brain structure(s)
+to obtain: \code{"left"} (left cortical surface), \code{"right"} (right
+cortical surface) and/or \code{"subcortical"} (subcortical and cerebellar
+gray matter). Can also be \code{"all"} (obtain all three brain structures).
+Default: \code{c("left","right")} (cortical surface only).
 
- If a brain structure is indicated but does not exist, a warning will be
- raised and that brain structure will be skipped.}
-
-\item{wb_path}{(Optional) Path to Connectome Workbench folder or executable. 
-If not provided, should be set with 
-\code{ciftiTools.setOption("wb_path", "path/to/workbench")}.}
+If a brain structure is indicated but does not exist, a warning will be
+raised and that brain structure will be skipped.}
 
 \item{verbose}{Should occasional updates be printed? Default: \code{FALSE}.}
 
@@ -45,19 +40,16 @@ If not provided, should be set with
 A \code{"xifti"} object. See \code{\link{is.xifti}}.
 }
 \description{
-Read a CIFTI file by exporting it as a single GIFTI 
- using \code{-cifti-convert -to-gifti-ext} (\code{\link{read_cifti_flat}}), 
- and obtaining the brainordinate mapping using 
- \code{-cifti-export-dense-mapping} (\code{\link{info_cifti}}).
+Read a CIFTI file by exporting it as a single GIFTI
+using \code{-cifti-convert -to-gifti-ext} (\code{\link{read_cifti_flat}}),
+and obtaining the brainordinate mapping using
+\code{-cifti-export-dense-mapping} (\code{\link{info_cifti}}).
 }
 \section{Connectome Workbench Requirement}{
 
- This function uses a system wrapper for the 'wb_command' executable. The 
- user must first download and install the Connectome Workbench, available 
- from https://www.humanconnectome.org/software/get-connectome-workbench . 
- The \code{wb_path} argument is the full file path to the Connectome 
- Workbench folder. (The full file path to the 'wb_cmd' executable also 
- works.)
+This function uses a system wrapper for the 'wb_command' executable. The
+user must first download and install the Connectome Workbench, available
+from https://www.humanconnectome.org/software/get-connectome-workbench .
 }
 
 \keyword{internal}

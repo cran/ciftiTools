@@ -4,7 +4,7 @@
 \alias{summary.xifti}
 \alias{print.summary.xifti}
 \alias{print.xifti}
-\title{Summarise cifti objects}
+\title{Summarize cifti objects}
 \usage{
 \method{summary}{xifti}(object, ...)
 
@@ -13,14 +13,13 @@
 \method{print}{xifti}(x, ...)
 }
 \arguments{
-\item{object}{Object of class "xifti". 
-See \code{\link{is.xifti}} and \code{\link{make_xifti}}.}
+\item{object}{Object of class \code{"xifti"}.}
 
 \item{...}{further arguments passed to or from other methods.}
 
-\item{x}{Object of class "xifti". 
+\item{x}{Object of class "xifti".
 See \code{\link{is.xifti}} and \code{\link{make_xifti}}.}
 }
 \description{
-Summary method for class "xifti"
+Summary method for class \code{"xifti"}
 }

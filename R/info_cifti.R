@@ -85,15 +85,15 @@ check_cifti_type <- function(intent, extn){
         "This CIFTI file has intent code", intent, "and extension", extn,
         "neither of which is supported by ciftiTools (yet).",
         "Only the following types are:\n\t",
-        paste(supported_intents()$value, collapse="\n\t "),
+        paste(supported_intents()$value, collapse="\t "),
         "\nRespectively, they correspond to these file extensions:\n\t",
-        paste(supported_intents()$extension, collapse="\n\t ")
+        paste(supported_intents()$extension, collapse="\t ")
       ))
     } else {
       warning(paste(
         "This CIFTI file has extension", extn, "which is not yet supported by ciftiTools.",
-        "Only the following types are:\n\t",
-        paste(supported_intents()$extension, collapse="\n\t "),
+        "Only the following types are:\t",
+        paste(supported_intents()$extension, collapse="\t "),
         "\nThe intent code", intent, "is supported but does not match the extension.",
         "Was the file named incorrectly?",
         "Continuing anyway with the intent code", intent, "and correct extension",
@@ -297,17 +297,21 @@ get_data_meta_from_cifti_xml <- function(xml, intent=3000) {
 #' @inheritSection Connectome_Workbench_Description Connectome Workbench Requirement
 #'
 #' @inheritParams cifti_fname_Param
-#' @inheritParams wb_path_Param
 #'
 #' @return The header, as a character vector
 #'
 #' @keywords internal
 #'
-header_cifti <- function(cifti_fname, wb_path=NULL){
-  run_wb_cmd(
-    paste("-nifti-information", sys_path(cifti_fname), "-print-header"),
-    wb_path, intern=TRUE
-  )
+header_cifti <- function(cifti_fname){
+  cmd <- paste("-nifti-information", sys_path(cifti_fname), "-print-header")
+  out <- run_wb_cmd(cmd, intern=TRUE, ignore.stdout=FALSE, ignore.stderr=TRUE)
+  if (length(out) == 0) {
+    stop(
+      "Workbench command '", paste(sys_path(ciftiTools.getOption("wb_path")), cmd), 
+      "' failed."
+    )
+  }
+  out
 }
 
 #' Get XML of a CIFTI
@@ -318,7 +322,6 @@ header_cifti <- function(cifti_fname, wb_path=NULL){
 #' @inheritSection Connectome_Workbench_Description Connectome Workbench Requirement
 #'
 #' @inheritParams cifti_fname_Param
-#' @inheritParams wb_path_Param
 #'
 #' @return The XML as a list
 #'
@@ -326,11 +329,15 @@ header_cifti <- function(cifti_fname, wb_path=NULL){
 #'
 #' @keywords internal
 #'
-xml_cifti <- function(cifti_fname, wb_path=NULL){
-  out <- run_wb_cmd(
-    paste("-nifti-information", sys_path(cifti_fname), "-print-xml"),
-    wb_path, intern=TRUE
-  )
+xml_cifti <- function(cifti_fname){
+  cmd <- paste("-nifti-information", sys_path(cifti_fname), "-print-xml")
+  out <- run_wb_cmd(cmd, intern=TRUE, ignore.stdout=FALSE, ignore.stderr=TRUE)
+  if (length(out) == 0) {
+    stop(
+      "Workbench command '", paste(sys_path(ciftiTools.getOption("wb_path")), cmd), 
+      "' failed."
+    )
+  }
   as_list(read_xml(paste(out, collapse="\n")))
 }
 
@@ -374,13 +381,12 @@ xml_cifti <- function(cifti_fname, wb_path=NULL){
 #' @inheritSection Connectome_Workbench_Description Connectome Workbench Requirement
 #'
 #' @inheritParams cifti_fname_Param
-#' @inheritParams wb_path_Param
 #'
 #' @return The metadata component of a \code{"xifti"} for the input CIFTI file
 #'
 #' @export
 #'
-info_cifti <- function(cifti_fname, wb_path=NULL){
+info_cifti <- function(cifti_fname){
 
   # Check if this CIFTI is supported.
   cifti_fname <- format_path(cifti_fname, mode=4)
@@ -390,8 +396,8 @@ info_cifti <- function(cifti_fname, wb_path=NULL){
   # -nifti-information ---------------------------------------------------------
   # ----------------------------------------------------------------------------
 
-  cif_head <- header_cifti(cifti_fname, wb_path)
-  cif_xml <- xml_cifti(cifti_fname, wb_path)
+  cif_head <- header_cifti(cifti_fname)
+  cif_xml <- xml_cifti(cifti_fname)
 
   # ----------------------------------------------------------------------------
   # Parsing --------------------------------------------------------------------
@@ -456,12 +462,12 @@ info_cifti <- function(cifti_fname, wb_path=NULL){
 
 #' @rdname info_cifti
 #' @export
-infoCIfTI <- function(cifti_fname, wb_path=NULL){
-  info_cifti(cifti_fname, wb_path=NULL)
+infoCIfTI <- function(cifti_fname){
+  info_cifti(cifti_fname)
 }
 
 #' @rdname info_cifti
 #' @export
-infocii <- function(cifti_fname, wb_path=NULL){
-  info_cifti(cifti_fname, wb_path=NULL)
+infocii <- function(cifti_fname){
+  info_cifti(cifti_fname)
 }

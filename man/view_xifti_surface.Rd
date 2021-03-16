@@ -5,195 +5,263 @@
 \alias{view_cifti_surface}
 \alias{viewCIfTI_surface}
 \alias{viewcii_surface}
-\title{View cortical surface}
+\title{View cortical surface data}
 \usage{
 view_xifti_surface(
-  xifti,
+  xifti = NULL,
+  surfL = NULL,
+  surfR = NULL,
+  color_mode = "auto",
+  zlim = NULL,
+  colors = NULL,
   idx = NULL,
   hemisphere = NULL,
   view = c("both", "lateral", "medial"),
-  width = NULL,
-  height = NULL,
-  zoom = NULL,
-  bg = NULL,
+  widget = NULL,
   title = NULL,
+  slider_title = "Index",
+  fname = FALSE,
+  fname_suffix = c("names", "idx"),
+  legend_ncol = NULL,
+  legend_embed = NULL,
+  digits = NULL,
   cex.title = NULL,
   text_color = "black",
-  save = FALSE,
-  close_after_save = TRUE,
-  fname = "xifti",
-  colors = NULL,
-  color_mode = NULL,
-  zlim = NULL,
-  surfL = NULL,
-  surfR = NULL,
-  qualitative_colorlegend = TRUE,
-  colorlegend_ncol = NULL,
-  colorbar_embedded = TRUE,
-  colorbar_digits = NULL,
+  bg = NULL,
+  borders = FALSE,
   alpha = 1,
   edge_color = NULL,
   vertex_color = NULL,
   vertex_size = 0,
-  border_color = NULL,
-  widget_idx_warn = NULL,
-  render_rgl = TRUE,
-  mode = NULL
+  width = NULL,
+  height = NULL,
+  zoom = NULL
 )
 
 view_cifti_surface(
-  xifti,
+  xifti = NULL,
+  surfL = NULL,
+  surfR = NULL,
+  color_mode = "auto",
+  zlim = NULL,
+  colors = NULL,
   idx = NULL,
   hemisphere = NULL,
   view = c("both", "lateral", "medial"),
-  width = NULL,
-  height = NULL,
-  zoom = NULL,
-  bg = NULL,
+  widget = NULL,
   title = NULL,
+  slider_title = "Index",
+  fname = FALSE,
+  fname_suffix = c("names", "idx"),
+  legend_ncol = NULL,
+  legend_embed = NULL,
+  digits = NULL,
   cex.title = NULL,
   text_color = "black",
-  save = FALSE,
-  close_after_save = TRUE,
-  fname = "xifti",
-  colors = NULL,
-  color_mode = NULL,
-  zlim = NULL,
-  surfL = NULL,
-  surfR = NULL,
-  colorbar_embedded = TRUE,
-  colorbar_digits = NULL,
+  bg = NULL,
+  borders = FALSE,
   alpha = 1,
   edge_color = NULL,
   vertex_color = NULL,
   vertex_size = 0,
-  widget_idx_warn = NULL,
-  render_rgl = TRUE,
-  mode = NULL
+  width = NULL,
+  height = NULL,
+  zoom = NULL
 )
 
 viewCIfTI_surface(
-  xifti,
+  xifti = NULL,
+  surfL = NULL,
+  surfR = NULL,
+  color_mode = "auto",
+  zlim = NULL,
+  colors = NULL,
   idx = NULL,
   hemisphere = NULL,
   view = c("both", "lateral", "medial"),
-  width = NULL,
-  height = NULL,
-  zoom = NULL,
-  bg = NULL,
+  widget = NULL,
   title = NULL,
+  slider_title = "Index",
+  fname = FALSE,
+  fname_suffix = c("names", "idx"),
+  legend_ncol = NULL,
+  legend_embed = NULL,
+  digits = NULL,
   cex.title = NULL,
   text_color = "black",
-  save = FALSE,
-  close_after_save = TRUE,
-  fname = "xifti",
-  colors = NULL,
-  color_mode = NULL,
-  zlim = NULL,
-  surfL = NULL,
-  surfR = NULL,
-  colorbar_embedded = TRUE,
-  colorbar_digits = NULL,
+  bg = NULL,
+  borders = FALSE,
   alpha = 1,
   edge_color = NULL,
   vertex_color = NULL,
   vertex_size = 0,
-  widget_idx_warn = NULL,
-  render_rgl = TRUE,
-  mode = NULL
+  width = NULL,
+  height = NULL,
+  zoom = NULL
 )
 
 viewcii_surface(
-  xifti,
+  xifti = NULL,
+  surfL = NULL,
+  surfR = NULL,
+  color_mode = "auto",
+  zlim = NULL,
+  colors = NULL,
   idx = NULL,
   hemisphere = NULL,
   view = c("both", "lateral", "medial"),
-  width = NULL,
-  height = NULL,
-  zoom = NULL,
-  bg = NULL,
+  widget = NULL,
   title = NULL,
+  slider_title = "Index",
+  fname = FALSE,
+  fname_suffix = c("names", "idx"),
+  legend_ncol = NULL,
+  legend_embed = NULL,
+  digits = NULL,
   cex.title = NULL,
   text_color = "black",
-  save = FALSE,
-  close_after_save = TRUE,
-  fname = "xifti",
-  colors = NULL,
-  color_mode = NULL,
-  zlim = NULL,
-  surfL = NULL,
-  surfR = NULL,
-  colorbar_embedded = TRUE,
-  colorbar_digits = NULL,
+  bg = NULL,
+  borders = FALSE,
   alpha = 1,
   edge_color = NULL,
   vertex_color = NULL,
   vertex_size = 0,
-  widget_idx_warn = NULL,
-  render_rgl = TRUE,
-  mode = NULL
+  width = NULL,
+  height = NULL,
+  zoom = NULL
 )
 }
 \arguments{
-\item{xifti}{Object of class "xifti". 
+\item{xifti}{Object of class "xifti".
 See \code{\link{is.xifti}} and \code{\link{make_xifti}}.}
 
-\item{idx}{The time/column index of the data to display. If its length is
-greater than one and \code{save==FALSE}, use the widget instead of the 
-OpenGL window to view the plot interactively, because the widget's slider
-will control what time/column is being displayed in the widget whereas all 
-meshes will be rendered on top of one another in the Open GL window.}
+\item{surfL, surfR}{(Optional) The brain surface model to use.
+Each can be a file path for a GIFTI, a file read by gifti::readgii,
+or a list with components "vertices" and "faces". If provided, they will override
+\code{xifti$surf$cortex_left} and \code{xifti$surf$cortex_right} if those exist.
+Leave as \code{NULL} (default) to use \code{xifti$surf$cortex_left} and
+\code{xifti$surf$cortex_right} if those exist, or the default inflated surfaces
+if those do not exist.}
 
-\item{hemisphere}{Which brain cortex to display: "both", "left", or "right".
- Each will be plotted in a separate panel column.
+\item{color_mode}{(Optional) \code{"sequential"}, \code{"qualitative"},
+\code{"diverging"}, or \code{"auto"} (default). Auto mode will use the
+qualitative color mode if the \code{"xifti"} object represents a .dlabel
+CIFTI (intent 3007). Otherwise, it will use the diverging mode if the data
+contains both positive and negative values, and the sequential mode if the
+data contains >90\\% positive or >90\\% negative values. See
+\code{\link{make_color_pal}} for more details.}
 
- If a brain cortex is requested but no surface is available, a default
- inflated surface will be used.
+\item{zlim}{(Optional) Controls the mapping of values to each
+color in \code{colors}. If the length is longer than
+one, using -Inf will set the value to the data minimum, and Inf will set
+the value to the data maximum. See \code{\link{make_color_pal}}
+description for more details.}
 
- This argument can also be \code{NULL} (default). In this case, the default
- inflated surface included with \code{ciftiTools} will be used for each
- cortex with data (i.e. if \code{xifti$data$cortex_left} and/or 
- \code{xifti$data$cortex_right} exist).
+\item{colors}{(Optional) "ROY_BIG_BL", vector of colors to use,
+the name of a ColorBrewer palette (see \code{RColorBrewer::brewer.pal.info}
+and colorbrewer2.org), or the name of a viridisLite palette.
+Defaults are \code{"ROY_BIG_BL"} (sequential),
+\code{"Set2"} (qualitative), and \code{"ROY_BIG_BL"} (diverging). An exception
+to these defaults is if the \code{"xifti"} object represents a .dlabel CIFTI (intent 3007),
+then the qualitative colors in the label table will be used.
+See \code{\link{make_color_pal}} for more details.}
 
- Surfaces without data will be colored white.}
+\item{idx}{The time/column index of the data to display.
 
-\item{view}{Which view to display: \code{"lateral"}, \code{"medial"}, or 
-\code{"both"}. If \code{NULL} (default), both views will be shown. Each view 
+If its length is greater than one, and \code{isFALSE(fname)},
+a widget must be used since a single OpenGL window cannot show multiple
+indexes. A slider will be added to the widget to control what time/column
+is being displayed.}
+
+\item{hemisphere}{Which brain cortex to display: "both" (default), "left",
+or "right". Each will be plotted in a separate panel column.
+
+If a brain cortex is requested but no surface is available, a default
+inflated surface will be used.
+
+This argument can also be \code{NULL} (default). In this case, the default
+inflated surface included with \code{ciftiTools} will be used for each
+cortex with data (i.e. if \code{xifti$data$cortex_left} and/or
+\code{xifti$data$cortex_right} exist).
+
+Surfaces without data will be colored white.}
+
+\item{view}{Which view to display: \code{"lateral"}, \code{"medial"}, or
+\code{"both"}. If \code{NULL} (default), both views will be shown. Each view
 will be plotted in a separate panel row.}
 
-\item{width}{The dimensions of the RGL window, in pixels. If both are
-\code{NULL} (default), the dimensions will be set to
-1000 (width) x 700 (height) for 1x1 and 2x2 subplots,
-1500 x 525 for 2x1 subplots, and
-500 x 700 for 1x2 subplots. These defaults are chosen to fit comfortably
-within a 1600 x 900 screen. Specyfing only one will set the other to maintain
-the same aspect ratio. Both can be specified to set the dimensions exactly.}
+\item{widget}{Display the plot in an htmlwidget? Should be logical or
+\code{NULL} (default), in which case a widget will be used only if needed
+(\code{length(idx)>1 & isFALSE(fname)}, \code{fname} is a file path to an
+.html file, or if \code{rgl.useNULL()}).}
 
-\item{height}{The dimensions of the RGL window, in pixels. If both are
-\code{NULL} (default), the dimensions will be set to
-1000 (width) x 700 (height) for 1x1 and 2x2 subplots,
-1500 x 525 for 2x1 subplots, and
-500 x 700 for 1x2 subplots. These defaults are chosen to fit comfortably
-within a 1600 x 900 screen. Specyfing only one will set the other to maintain
-the same aspect ratio. Both can be specified to set the dimensions exactly.}
+\item{title}{Optional title(s) for the plot(s). It will be printed at the top
+in a separate subplot with 1/4 the height of the brain cortex subplots.
 
-\item{zoom}{Adjustment to size of brain meshes. Default: \code{3/5}
-(100\% + 3/5*100\% = 160\% the original size).}
+Default: \code{NULL} will not use any title if \code{length(idx)==1}.
+Otherwise, it will use the time index (".dtseries") or name
+(.dscalar or .dlabel) of each data column.
 
-\item{bg}{Background color. \code{NULL} will not color the background (white).}
+To use a custom title(s), use a length 1 character vector (same title for
+each plot) or length \code{length(idx)} character vector (different title
+for each plot). Set to \code{NULL} or an empty character to omit the title.
 
-\item{title}{Optional title(s) for the plot(s). It will be printed at the top 
- in a separate subplot with 1/4 the height of the brain cortex subplots.
- 
- Default: \code{NULL} will use the time index (".dtseries") or name
- (.dscalar or .dlabel) of the data column being plotted. 
+If the title is non-empty but does not appear, try lowering \code{cex.title}.}
 
- To use a custom title(s), use a length 1 character vector (same title for
- each plot) or length \code{length(idx)} character vector (different title
- for each plot). Set to an empty string \code{""} to omit the title. 
+\item{slider_title}{Text at bottom of plot that will be added if a slider
+is used, to provide a title for it. Default: \code{"Index"}.
+If \code{NULL} or an empty character, no title will be added.}
 
- If the title is non-empty but does not appear, \code{cex.title} may need to 
- be lowered.}
+\item{fname}{Save the plot(s) (and color legend if applicable)?
+
+If \code{isFALSE(fname)} (default), no files will be written.
+
+If \code{fname} is a length-1 character vector ending in ".html", an html
+with an interactive widget will be written.
+
+If neither of the cases above apply, a png image will be written for each
+\code{idx}. If \code{isTRUE(fname)} the files will be named by the
+data column names (underscores will replace spaces). Set \code{fname} to a
+length 1 character vector to name files by this suffix followed by the
+\code{fname_suffix}: either the data column names (\code{"names"}) or the
+index value (\code{"idx"}). Set this to a character vector with the same
+length as \code{idx} to name the files exactly.
+
+If a separate color legend exists and \code{!isFALSE(fname)}, it will be
+saved to "[first_surf_fname]_legend.png".}
+
+\item{fname_suffix}{Save the plot(s) (and color legend if applicable)?
+
+If \code{isFALSE(fname)} (default), no files will be written.
+
+If \code{fname} is a length-1 character vector ending in ".html", an html
+with an interactive widget will be written.
+
+If neither of the cases above apply, a png image will be written for each
+\code{idx}. If \code{isTRUE(fname)} the files will be named by the
+data column names (underscores will replace spaces). Set \code{fname} to a
+length 1 character vector to name files by this suffix followed by the
+\code{fname_suffix}: either the data column names (\code{"names"}) or the
+index value (\code{"idx"}). Set this to a character vector with the same
+length as \code{idx} to name the files exactly.
+
+If a separate color legend exists and \code{!isFALSE(fname)}, it will be
+saved to "[first_surf_fname]_legend.png".}
+
+\item{legend_ncol}{Number of columns in color legend. If
+\code{NULL} (default), use 10 entries per row. Only applies if the color
+legend is used (qualitative data).}
+
+\item{legend_embed}{Should the colorbar be embedded in the plot?
+It will be positioned in the bottom-left corner, in a separate subplot
+with 1/4 the height of the brain cortex subplots. Default: \code{TRUE}.
+If \code{FALSE}, print/save it separately instead.
+
+Only applies if the color bar is used (sequential or diverging data).
+The color legend (qualitative data) cannot be embedded at the moment.}
+
+\item{digits}{The number of digits for the colorbar legend ticks.
+If \code{NULL} (default), let \code{\link{format}} decide.}
 
 \item{cex.title}{Font size multiplier for the title. \code{NULL} (default)
 will use \code{2} for titles less than 20 characters long, and smaller
@@ -202,61 +270,14 @@ sizes for increasingly longer titles.}
 \item{text_color}{Color for text in title and colorbar legend. Default:
 "black".}
 
-\item{save}{Save the plot to a .png file named by \code{fname}? Default:
-\code{FALSE}.}
+\item{bg}{Background color. \code{NULL} will not color the background (white).}
 
-\item{close_after_save}{If \code{save==TRUE}, close the interactive Open GL 
-window at the end of this function call? Default: \code{TRUE}.}
-
-\item{fname}{An identifier to use for naming the saved images
-("[fname].png") or video frames ("[fname]_1.png", "[fname]_2.png", ...).
-Default: \code{"xifti"} for \code{xifti_view_surface} and \code{"surf"} for
-\code{view_surf}.}
-
-\item{colors}{(Optional) "ROY_BIG_BL", vector of colors to use,
-OR the name of a ColorBrewer palette (see \code{RColorBrewer::brewer.pal.info}
-and colorbrewer2.org). Defaults are \code{"ROY_BIG_BL"} (sequential),
-\code{"Set2"} (qualitative), and \code{"ROY_BIG_BL"} (diverging). An exception
-to these defaults is if the \code{"xifti"} object represents a .dlabel CIFTI (intent 3007),
-then the qualitative colors in the label table will be used.
-See the \code{ciftiTools::make_color_pal()} description for more details.}
-
-\item{color_mode}{(Optional) \code{"sequential"}, \code{"qualitative"},
-or \code{"diverging"}. \code{NULL} will use the qualitative color mode if
-the \code{"xifti"} object represents a .dlabel CIFTI (intent 3007), and the sequential
-color mode otherwise. See the \code{ciftiTools::make_color_pal()}
-description for more details.}
-
-\item{zlim}{(Optional) Controls the mapping of values to each
-color in \code{colors}. If the length is longer than
-one, using -Inf will set the value to \code{DATA_MIN}, and Inf will set
-the value to \code{DATA_MAX}. See the
-\code{ciftiTools::make_color_pal()} description for more details.}
-
-\item{surfL, surfR}{(Optional if \code{xifti$surf$cortex_left} and
-\code{xifti$surf$cortex_right} are not empty) The brain surface model to use.
-Each can be a file path for a GIFTI, a file read by gifti::readgii,
-or a list with components "vertices" and "faces". If provided, they will override
-\code{xifti$surf$cortex_left} and \code{xifti$surf$cortex_right} if they exist.
-Otherwise, leave these arguments as \code{NULL} (default) to use
-\code{xifti$surf$cortex_left} and \code{xifti$surf$cortex_right}.}
-
-\item{qualitative_colorlegend}{If \code{color_mode=="qualitative"}, should 
-the colorbar be replaced with a color legend? It will be printed separately 
-from the RGL window. Default: \code{TRUE}.}
-
-\item{colorlegend_ncol}{Number of columns in color legend. If
-\code{NULL} (default), use 10 entries per row. Only applies if the color
-legend is drawn (\code{qualitative_colorlegend} is \code{TRUE} and the
-qualitative color mode is used).}
-
-\item{colorbar_embedded}{Should the colorbar be embedded in the plot?
-It will be positioned in the bottom-left corner, in a separate subplot
-with 1/4 the height of the brain cortex subplots. Default: \code{TRUE}.
-If \code{FALSE}, print it separately instead.}
-
-\item{colorbar_digits}{The number of digits for the colorbar legend ticks.
-If \code{NULL} (default), let \code{\link{format}} decide.}
+\item{borders}{Only applicable if \code{color_mode} is \code{"qualitative"}.
+Border vertices will be identified (those that share a face with at least
+one vertex of a different value) and colored over. If this argument is
+\code{TRUE} borders will be colored in black; provide the name of a different
+color to use that instead. If \code{FALSE} or \code{NULL} (default), do
+not draw borders.}
 
 \item{alpha}{Transparency value for mesh coloring, between 0 and 1. Default:
 \code{1.0} (no transparency).}
@@ -264,103 +285,79 @@ If \code{NULL} (default), let \code{\link{format}} decide.}
 \item{edge_color}{Outline each edge in this color. Default: \code{NULL} (do
 not outline the edges).}
 
-\item{vertex_color}{Draw each vertex in this color. Default: 
+\item{vertex_color}{Draw each vertex in this color. Default:
 \code{"black"}. Vertices are only drawn if \code{vertex_size > 0}}
 
-\item{vertex_size}{Draw each vertex with this size. Default: \code{0} 
+\item{vertex_size}{Draw each vertex with this size. Default: \code{0}
 (do not draw the vertices).}
 
-\item{border_color}{Only applicable if \code{color_mode} is 
-\code{"qualitative"}. Border vertices will be identified (those that share a
-faces with at least one vertex of a different value) and drawn in this color
-instead, overriding the color indicated by their value. If \code{NULL}, do
-not draw borders.}
+\item{width}{The dimensions of the RGL window, in pixels. If both are
+\code{NULL} (default), these dimensions depend on type of output (Open GL
+window or widget) and subplots (\code{hemisphere}, \code{view}, \code{title},
+and \code{slider_title}) and are chosen to be the largest plot within a
+1500 x 700 area (Open GL window) or 600 x 700 area (widget) that maintains
+a brain hemisphere subplot dimensions ratio of 10 x 7. Specifying only one
+will set the other to maintain this aspect ratio. Both can be specified to
+set the dimensions exactly. (These arguments do not affect the size of the
+legend, which cannot be controlled.)}
 
-\item{widget_idx_warn}{If \code{save==FALSE} or \code{close_after_save==FALSE},
-each mesh must be rendered in the same window. This is problematic if 
-\code{idx} and the mesh size are large. So, this option can be used to print 
-a warning when \code{length(idx)} exceeds \code{widget_idx_warn} and the 
-meshes are being drawn in the same window. Use \code{Inf} to never print a
-warning. The default, \code{NULL}, will print a warning if \code{idx} times
-the number of vertices exceeds 200k (approximately three 32k meshes for both
-the left and right hemisphere.)}
+\item{height}{The dimensions of the RGL window, in pixels. If both are
+\code{NULL} (default), these dimensions depend on type of output (Open GL
+window or widget) and subplots (\code{hemisphere}, \code{view}, \code{title},
+and \code{slider_title}) and are chosen to be the largest plot within a
+1500 x 700 area (Open GL window) or 600 x 700 area (widget) that maintains
+a brain hemisphere subplot dimensions ratio of 10 x 7. Specifying only one
+will set the other to maintain this aspect ratio. Both can be specified to
+set the dimensions exactly. (These arguments do not affect the size of the
+legend, which cannot be controlled.)}
 
-\item{render_rgl}{Default: \code{TRUE}. If \code{FALSE}, do not render the
-Open GL window, widget, or image(s). Instead, return the \code{rgl} mesh
-objects and coloring information. This should be used by developers only.}
-
-\item{mode}{Deprecated: has no effect and will be removed. See \code{save}
-and \code{close_after_save}.}
+\item{zoom}{Adjust the sizes of the brain meshes. Default: \code{NULL} (will
+be set to 0.6 or 160\\% for the Open GL window, and 0.67 or 167\\% for the
+widget.)}
 }
 \value{
-If \code{save} and \code{close_after_save}, the name(s) of the image
- file(s) that were written. 
-
- Otherwise, if the length of \code{idx} is equal to one, a list of the rgl
- object IDs which can be used to further manipulate the Open GL window; if
- the length of \code{idx} is greater than one, the htmlwidget with slider
- to interactively control which timepoint is being displayed.
+If a png or html file(s) were written, the names of the files for
+each index will be returned. Otherwise, the widget itself is returned
+if a widget was used, and the rgl object IDs are returned if an Open GL
+window was used. The rgl object IDs are useful for further programmatic
+manipulation of the Open GL window.
 }
 \description{
 Visualize \code{"xifti"} cortical data using an interactive Open GL window
- made with \code{rgl}. The \code{rgl} and \code{fields} packages are required.
+or htmlwidget made with \code{rgl}. The \code{rmarkdown} package is
+required for the htmlwidget functionality.
 }
 \section{Navigating and Embedding the Interactive Plots}{
 
- This function opens an interactive Open GL window rendered by \code{rgl}. 
- If \code{save==TRUE} and \code{close_after_save==TRUE}, the window will be
- closed after the function call. Otherwise, it is kept open and the following
- information applies:
+Here are instructions for using the interactive Open GL window and html widget:
 
- To navigate the plot, left click and drag the cursor to rotate. Use the 
- scroll wheel or right click and drag to zoom. Press the scroll wheel and drag
- to change the field-of-view. Execute \code{\link[rgl]{snapshot}} to save the
- current window as a .png file. Execute \code{\link[rgl:rgl.open]{rgl.close}} to close
- the window. \code{\link[rgl:viewpoint]{rgl.viewpoint}} can be used for programmatic
- navigation. 
+To navigate the plot, left click and drag the cursor to rotate. Use the
+scroll wheel or right click and drag to zoom. Press the scroll wheel and drag
+to change the field-of-view. For Open GL windows, execute
+\code{\link[rgl]{snapshot}} to save the current window as a .png file,
+\code{\link[rgl:rgl.open]{rgl.close}} to close the window, and
+\code{\link[rgl:viewpoint]{rgl.viewpoint}} to programmatically control the
+perspective.
 
- The Open GL window can be embedded as an htmlwidget in an R Markdown document
- using one of two methods. The first is executing \code{\link[rgl]{rglwidget}}
- in the chunk where the plot is made. This first method should work within
- both the RStudio IDE and a knitted .html file. The second method is 
- executing \code{\link[rgl:hook_rgl]{setupKnitr}} at the start of the document and 
- then using the chunk option \code{webgl=TRUE} in the chunk where the plot is
- made. The second method is specifically for knitted .html files. Although
- the first method is the newest approach and is recommended by others, we
- used the second method in the \code{ciftiTools} vignette because the first
- is not compatible with htmlpreview. For both methods, the window still
- needs to be open to render the widget. Also for both methods, you will 
- probably need to tweak the image dimensions e.g. 
- \code{fig.width=8, fig.height=5} in the chunk options, because it uses the 
- defaults from RMarkdown/Knitr instead of what makes sense based on the 
- dimensions of the Open GL window.
- 
- For \code{view_xifti_surface}, if \code{length(idx) > 1}, this function will
- automaticaly return an htmlwidget using the first method, but with a
- \code{\link[rgl]{playwidget}} wrapper to add a slider to control which
- column index is being displayed. All the meshes will be rendered on top of
- one another in the Open GL window, so only the widget will be useful for
- viewing the data interactively. Since it uses the first method, it will not
- be visible with htmlpreview. No additional call to 
- \code{\link[rgl]{rglwidget}} is necessary, but \code{\link[rgl:rgl.open]{rgl.close}}
- must be called in a following chunk to close the Open GL window.
+See the vignette for examples on embedding snapshots of the Open GL window
+or interactive html widgets in an R Markdown document.
 }
 
 \section{Embedding the Static Plots}{
 
- If \code{save==TRUE}, the plot(s) is written to a .png file. (For 
- \code{view_xifti_surface}, if \code{length(idx) > 1}, each \code{idx} will
- be written to a separate image file.) You can use 
- \code{\link[knitr]{include_graphics}} to embed an image file in an R
- Markdown document. If \code{close_after_save==TRUE}, the return value of this
- function call is the name(s) of the image file(s) that were written, so it
- can be used directly to display the image.
+If \code{save==TRUE}, the plot(s) is written to a .png file. (For
+\code{view_xifti_surface}, if \code{length(idx) > 1}, each \code{idx} will
+be written to a separate image file.) You can use
+\code{\link[knitr]{include_graphics}} to embed an image file in an R
+Markdown document. If \code{close_after_save==TRUE}, the return value of this
+function call is the name(s) of the image file(s) that were written, so it
+can be used directly to display the image.
 
- There's an additional way to embed an image of this plot without writing a
- .png file: use \code{save==FALSE} and set the chunk options 
- \code{rgl=TRUE, format="png"}. You will probably need to tweak the image
- dimensions e.g. \code{fig.width=8, fig.height=5} in the chunk options, 
- because it uses the defaults from RMarkdown/Knitr instead of what makes
- sense based on the dimensions of the Open GL window.
+There's an additional way to embed an image of this plot without writing a
+.png file: use \code{save==FALSE} and set the chunk options
+\code{rgl=TRUE, format="png"}. You will probably need to tweak the image
+dimensions e.g. \code{fig.width=8, fig.height=5} in the chunk options,
+because it uses the defaults from RMarkdown/Knitr instead of what makes
+sense based on the dimensions of the Open GL window.
 }
 

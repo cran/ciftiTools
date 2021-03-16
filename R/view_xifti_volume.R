@@ -6,15 +6,18 @@
 #' @param structural_img The structural MRI image on which to overlay the
 #'  subcortical values. Can be a file name, \code{"MNI"} (default) to use
 #'  the MNI T1-weighted template, or \code{NULL} to use a blank image.
-#' @param idx The time/column index of the \code{"xifti"} data to plot.
-#' @param plane If use_papaya=FALSE, the plane to display.
+#' @param idx The time/column index of the \code{"xifti"} data to plot. Must
+#'  be a single index (length 1).
+#' @param plane If interactive=FALSE, the plane to display.
 #'  Default: \code{"axial"}. Other options are \code{"sagittal"} and 
 #'  \code{"coronal"}.
-#' @param num.slices If use_papaya=FALSE, the number of slices to display.
+#' @param num.slices If interactive=FALSE, the number of slices to display.
 #'  Default: \code{9}.
-#' @param use_papaya use_papaya=TRUE will use papayar to allows for interactive visualization.
-#' @param z_min Floor value.
-#' @param z_max Ceiling value.
+#' @param interactive interactive=TRUE will use papayar to allows for interactive visualization.
+#' @param zlim A length-2 numeric vector giving the minimum and maximum values to
+#'  plot. Data values beyond this range will be truncated to the min/max. If
+#'  \code{NULL} (default), will use the min and max of the data.
+#'  
 #' @inheritParams verbose_Param_TRUE
 #' @param ... Additional arguments to pass to \code{papayar::papaya} or \code{oro.nifti::overlay}
 #'
@@ -22,17 +25,19 @@
 #' @importFrom oro.nifti overlay readNIfTI as.nifti
 view_xifti_volume <- function(
   xifti, structural_img="MNI", idx=1, plane=c("axial", "sagittal", "coronal"),
-  num.slices=9, use_papaya=FALSE, z_min=NULL, z_max=NULL,
+  num.slices=9, interactive=FALSE, zlim=NULL,
   verbose=TRUE, ...) {
 
-  if (use_papaya) {
+  if (interactive) {
     if (!requireNamespace("papayar", quietly = TRUE)) {
       stop("Package \"papayar\" needed for this function to work. Please install it.",
            call. = FALSE)
     }
   }
 
-  #stop("Does not work.")
+  if (length(idx) > 1) {
+    stop("Only one `idx` at a time is supported for `view_xifti_volume`.")
+  }
 
   stopifnot(is.xifti(xifti))
 
@@ -42,7 +47,7 @@ view_xifti_volume <- function(
   labs <- unmask_vol(as.numeric(xifti$meta$subcort$labels), xifti$meta$subcort$mask, fill=0)
 
   # Pick slices with a lot of subcortical voxels.
-  if (!use_papaya) {
+  if (!interactive) {
     plane <- match.arg(plane, c("axial", "sagittal", "coronal"))
     if (plane=="axial") mask_count <- apply(xifti$meta$subcort$mask, 3, sum)
     if (plane=="coronal") mask_count <- apply(xifti$meta$subcort$mask, 2, sum)
@@ -53,8 +58,21 @@ view_xifti_volume <- function(
     slices <- slices[inds]
   }
 
-  if (!is.null(z_min)) values[values < z_min] <- z_min
-  if (!is.null(z_max)) values[values > z_max] <- z_max
+  if (!is.null(zlim)) {
+    if (length(zlim) != 2) {
+      stop("`zlim` must be a length 2 vector giving the min and max values to plot.")
+    }
+    if (zlim[1] > zlim[2]) {
+      warning(
+        "The first entry of zlim was greater than the second. ",
+        "Using the first as the max and second as the min."
+      )
+      zlim <- rev(zlim)
+    }
+    values[values < zlim[1]] <- zlim[1]
+    values[values > zlim[2]] <- zlim[2]
+  }
+
   if (verbose) {
     cat(paste0(
       "Values to be plotted range from ",
@@ -127,7 +145,7 @@ view_xifti_volume <- function(
   img_labels@.Data <- labs
   img_labels@.Data[labs==0] <- NA
 
-  if (!use_papaya) {
+  if (!interactive) {
     if (plane=="axial") {
       img <- img[,,slices]
       img_overlay <- img_overlay[,,slices]
@@ -148,7 +166,7 @@ view_xifti_volume <- function(
 #' @export
 view_cifti_volume <- function(
   xifti, structural_img="MNI", idx=1, plane=c("axial", "sagittal", "coronal"),
-  num.slices=9, use_papaya=FALSE, z_min=NULL, z_max=NULL,
+  num.slices=9, interactive=FALSE, zlim=NULL,
   verbose=TRUE, ...) {
 
   view_xifti_volume(
@@ -156,8 +174,8 @@ view_cifti_volume <- function(
     structural_img=structural_img,
     idx=idx, plane=plane,
     num.slices=num.slices,
-    use_papaya=use_papaya,
-    z_min=z_min, z_max=z_max,
+    interactive=interactive,
+    zlim=zlim,
     verbose=verbose, ...
   )
 }
@@ -166,7 +184,7 @@ view_cifti_volume <- function(
 #' @export
 viewCIfTI_volume <- function(
   xifti, structural_img="MNI", idx=1, plane=c("axial", "sagittal", "coronal"),
-  num.slices=9, use_papaya=FALSE, z_min=NULL, z_max=NULL,
+  num.slices=9, interactive=FALSE, zlim=NULL,
   verbose=TRUE, ...) {
 
   view_xifti_volume(
@@ -174,8 +192,8 @@ viewCIfTI_volume <- function(
     structural_img=structural_img,
     idx=idx, plane=plane,
     num.slices=num.slices,
-    use_papaya=use_papaya,
-    z_min=z_min, z_max=z_max,
+    interactive=interactive,
+    zlim=zlim,
     verbose=verbose, ...
   )
 }
@@ -184,7 +202,7 @@ viewCIfTI_volume <- function(
 #' @export
 viewcii_volume <- function(
   xifti, structural_img="MNI", idx=1, plane=c("axial", "sagittal", "coronal"),
-  num.slices=9, use_papaya=FALSE, z_min=NULL, z_max=NULL,
+  num.slices=9, interactive=FALSE, zlim=NULL,
   verbose=TRUE, ...) {
 
   view_xifti_volume(
@@ -192,8 +210,8 @@ viewcii_volume <- function(
     structural_img=structural_img,
     idx=idx, plane=plane,
     num.slices=num.slices,
-    use_papaya=use_papaya,
-    z_min=z_min, z_max=z_max,
+    interactive=interactive,
+    zlim=zlim,
     verbose=verbose, ...
   )
 }

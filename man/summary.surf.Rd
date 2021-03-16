@@ -4,7 +4,7 @@
 \alias{summary.surf}
 \alias{print.summary.surf}
 \alias{print.surf}
-\title{Summarise cifti objects}
+\title{Summarize cifti objects}
 \usage{
 \method{summary}{surf}(object, ...)
 
@@ -13,7 +13,7 @@
 \method{print}{surf}(x, ...)
 }
 \arguments{
-\item{object}{Object of class "surf". 
+\item{object}{Object of class "surf".
 See \code{\link{is.surf}} and \code{\link{make_surf}}.}
 
 \item{...}{further arguments passed to or from other methods.}

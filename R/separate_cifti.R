@@ -27,15 +27,15 @@
 #'  (default) to obtain ROIs for each of the \code{brainstructures}. \code{NULL} 
 #'  to not obtain any ROIs. This should be a subset of \code{brainstructures}.
 #' @param cortexL_fname,cortexR_fname (Optional) GIFTI file names 
-#'  (*.[func/label].gii) to save the [left/right] cortex data to. If not provided, 
-#'  defaults to \code{"*[L/R].[func/label].gii"}, where * is the file name
+#'  (*.\[func/label\].gii) to save the \[left/right\] cortex data to. If not provided, 
+#'  defaults to \code{"*[L/R].\[func/label\].gii"}, where * is the file name
 #'  component of \code{cifti_fname}. Will be written in \code{write_dir}. 
 #' 
 #'  dtseries and dscalar files should use "func", whereas dlabel files should 
 #'  use "label".
 #' @param ROIcortexL_fname,ROIcortexR_fname (Optional) GIFTI file names
-#'  (*.[func/label].gii) to save the [left/right] cortex ROI to. If not provided, 
-#'  defaults to \code{"*ROI_[L/R].[func/label].gii"}, where * is the file name component
+#'  (*.\[func/label\].gii) to save the \[left/right\] cortex ROI to. If not provided, 
+#'  defaults to \code{"*ROI_[L/R].\[func/label\].gii"}, where * is the file name component
 #'  of \code{cifti_fname}. The cortical ROIs typically represent the medial wall 
 #'  mask, with values of 1 for in-ROI (non-medial wall) vertices and 0 for 
 #'  out-of-ROI (medial wall) vertices. Will be written in \code{write_dir}.
@@ -43,7 +43,7 @@
 #'  dtseries and dscalar files should use "func", whereas dlabel files should
 #'  use "label".
 #' @param subcortVol_fname,subcortLabs_fname (Optional) NIFTI file names to save
-#'  the subcortical [volume/labels] to. If not provided, defaults to 
+#'  the subcortical \[volume/labels\] to. If not provided, defaults to 
 #'  \code{"*[/.labels].nii"}, where * is the file name component of 
 #'  \code{cifti_fname}. Will be written in \code{write_dir}.
 #' @param ROIsubcortVol_fname (Optional) NIFTI file names to save
@@ -54,7 +54,6 @@
 #'  (in subcortex) voxels and 0 for out-of-ROI (not in subcortex) voxels. Will 
 #'  be written in \code{write_dir}.
 #' @inheritParams write_dir_Param_generic
-#' @inheritParams wb_path_Param
 #'
 #' @return A named character vector with the file paths to the written 
 #'  NIFTI and GIFTI files
@@ -68,7 +67,7 @@ separate_cifti <- function(cifti_fname,
   ROI_brainstructures="all", 
   ROIcortexL_fname=NULL, ROIcortexR_fname=NULL, 
   ROIsubcortVol_fname=NULL, 
-  write_dir=NULL, wb_path=NULL) {
+  write_dir=NULL) {
 
   cifti_fname <- format_path(cifti_fname)
   if (!file.exists(cifti_fname)) {
@@ -87,7 +86,7 @@ separate_cifti <- function(cifti_fname,
   if ("all" %in% brainstructures) { 
     brainstructures <- c("left","right","subcortical")
   }
-  cifti_info <- info_cifti(cifti_fname, wb_path)
+  cifti_info <- info_cifti(cifti_fname)
   check_cifti_type(cifti_info$cifti$intent, extn_cifti)
   bs_present <- brainstructures %in% cifti_info$cifti$brainstructures
   if (!all(bs_present)) {
@@ -194,7 +193,7 @@ separate_cifti <- function(cifti_fname,
   }
 
   # Run it.
-  run_wb_cmd(cmd, wb_path)
+  run_wb_cmd(cmd)
 
   invisible(sep_fnames)
 }
@@ -208,7 +207,7 @@ separateCIfTI <- function(cifti_fname,
   ROI_brainstructures="all", 
   ROIcortexL_fname=NULL, ROIcortexR_fname=NULL, 
   ROIsubcortVol_fname=NULL, 
-  write_dir=NULL, wb_path=NULL){
+  write_dir=NULL){
 
   separate_cifti(
     cifti_fname=cifti_fname, brainstructures=brainstructures, 
@@ -217,7 +216,7 @@ separateCIfTI <- function(cifti_fname,
     ROI_brainstructures=ROI_brainstructures, 
     ROIcortexL_fname=ROIcortexL_fname, ROIcortexR_fname=ROIcortexR_fname, 
     ROIsubcortVol_fname=ROIsubcortVol_fname, 
-    write_dir=write_dir, wb_path=wb_path
+    write_dir=write_dir
   )
 }
 
@@ -230,7 +229,7 @@ separatecii <- function(cifti_fname,
   ROI_brainstructures="all", 
   ROIcortexL_fname=NULL, ROIcortexR_fname=NULL, 
   ROIsubcortVol_fname=NULL, 
-  write_dir=NULL, wb_path=NULL){
+  write_dir=NULL){
 
   separate_cifti(
     cifti_fname=cifti_fname, brainstructures=brainstructures, 
@@ -239,6 +238,6 @@ separatecii <- function(cifti_fname,
     ROI_brainstructures=ROI_brainstructures, 
     ROIcortexL_fname=ROIcortexL_fname, ROIcortexR_fname=ROIcortexR_fname, 
     ROIsubcortVol_fname=ROIsubcortVol_fname, 
-    write_dir=write_dir, wb_path=wb_path
+    write_dir=write_dir
   )
 }

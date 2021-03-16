@@ -12,8 +12,7 @@ write_cifti(
   cifti_fname,
   surfL_fname = NULL,
   surfR_fname = NULL,
-  verbose = TRUE,
-  wb_path = NULL
+  verbose = TRUE
 )
 
 writeCIfTI(
@@ -21,8 +20,7 @@ writeCIfTI(
   cifti_fname,
   surfL_fname = NULL,
   surfR_fname = NULL,
-  verbose = TRUE,
-  wb_path = NULL
+  verbose = TRUE
 )
 
 writecii(
@@ -30,8 +28,7 @@ writecii(
   cifti_fname,
   surfL_fname = NULL,
   surfR_fname = NULL,
-  verbose = TRUE,
-  wb_path = NULL
+  verbose = TRUE
 )
 
 write_xifti(
@@ -39,40 +36,32 @@ write_xifti(
   cifti_fname,
   surfL_fname = NULL,
   surfR_fname = NULL,
-  verbose = TRUE,
-  wb_path = NULL
+  verbose = TRUE
 )
 }
 \arguments{
-\item{xifti}{Object of class "xifti". 
+\item{xifti}{Object of class "xifti".
 See \code{\link{is.xifti}} and \code{\link{make_xifti}}.}
 
 \item{cifti_fname}{File path of CIFTI-format data (ending in ".d*.nii").}
 
-\item{surfL_fname, surfR_fname}{If the [left/right] surface is present, it 
-will be a written to a GIFTI file at this file path. If \code{NULL} 
+\item{surfL_fname, surfR_fname}{If the [left/right] surface is present, it
+will be a written to a GIFTI file at this file path. If \code{NULL}
 (default), do not write out the surface.}
 
 \item{verbose}{Should occasional updates be printed? Default: \code{TRUE}.}
-
-\item{wb_path}{(Optional) Path to Connectome Workbench folder or executable. 
-If not provided, should be set with 
-\code{ciftiTools.setOption("wb_path", "path/to/workbench")}.}
 }
 \value{
 Named character vector of the written files
 }
 \description{
-Write out a \code{"xifti"} object as a CIFTI file and (optionally) GIFTI 
- surface files.
+Write out a \code{"xifti"} object as a CIFTI file and (optionally) GIFTI
+surface files.
 }
 \section{Connectome Workbench Requirement}{
 
- This function uses a system wrapper for the 'wb_command' executable. The 
- user must first download and install the Connectome Workbench, available 
- from https://www.humanconnectome.org/software/get-connectome-workbench . 
- The \code{wb_path} argument is the full file path to the Connectome 
- Workbench folder. (The full file path to the 'wb_cmd' executable also 
- works.)
+This function uses a system wrapper for the 'wb_command' executable. The
+user must first download and install the Connectome Workbench, available
+from https://www.humanconnectome.org/software/get-connectome-workbench .
 }
 

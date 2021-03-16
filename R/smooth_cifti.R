@@ -8,27 +8,27 @@
 #'  Unless the label values were ordinal, this is probably not desired so a
 #'  warning will be printed.
 #' 
-#'  The input can also be a \code{"xifti"} object.
+#'  Can accept a \code{"xifti"} object as well as a path to a CIFTI-file.
 #' 
 #'  Surfaces are required for each hemisphere in the CIFTI. If they are not provided,
 #'  the inflated surfaces included in \code{"ciftiTools"} will be used.
+#' 
 #' @inheritSection Connectome_Workbench_Description Connectome Workbench Requirement
 #' 
-#' @param x The \code{"xifti"} object or CIFTI file to smooth.
-#' @param cifti_target_fname The file name to save the smoothed CIFTI. If
-#'  \code{NULL}, will be set to a file in a temporary directory.
-#' @param surface_sigma The sigma for the gaussian surface smoothing kernel, in mm
-#' @param volume_sigma The sigma for the gaussian volume smoothing kernel, in mm
-#' @param surfL_fname,surfR_fname (Required if the 
-#'  corresponding cortex is present) Surface GIFTI files for the left and right
-#'  cortical surface
-#' @param cerebellum_fname (Optional) Surface GIFTI file for the 
-#'  cerebellar surface
+#' @param x The CIFTI file name or \code{"xifti"} object to resample.
+#' @param cifti_target_fname File name for the smoothed CIFTI. If
+#'  \code{NULL}, will be written to "smoothed.d*.nii" in the current working
+#'  directory if \code{x} was a CIFTI file, and in a temporary directory if 
+#'  \code{x} was a \code{"xifti"} object.
+#' @param surf_FWHM,vol_FWHM The full width at half maximum (FWHM) parameter
+#'  for the gaussian surface or volume smoothing kernel, in mm. Default: \code{5}
+#' @param surfL_fname,surfR_fname (Required if the corresponding cortex is 
+#'  present) Surface GIFTI files for the left and right cortical surfaces
+#' @param cerebellum_fname (Optional) Surface GIFTI file for the cerebellar surface
 #' @param subcortical_zeroes_as_NA,cortical_zeroes_as_NA Should zero-values in 
 #'  the subcortical volume or cortex be treated as NA? Default: \code{FALSE}.
 #' @param subcortical_merged Smooth across subcortical structure boundaries?
 #'  Default: \code{FALSE}.
-#' @inheritParams wb_path_Param
 #'
 #' @return The \code{cifti_target_fname}, invisibly
 #' 
@@ -36,22 +36,18 @@
 #'
 smooth_cifti <- function(
   x, cifti_target_fname=NULL,
-  surface_sigma, volume_sigma,
+  surf_FWHM=5, vol_FWHM=5,
   surfL_fname=NULL, surfR_fname=NULL, cerebellum_fname=NULL,
   subcortical_zeroes_as_NA=FALSE, cortical_zeroes_as_NA=FALSE,
-  subcortical_merged=FALSE,
-  wb_path=NULL){
+  subcortical_merged=FALSE){
 
+  # Args check -----------------------------------------------------------------
   input_is_xifti <- is.xifti(x, messages=FALSE)
+  surfL_return <- surfR_return <- FALSE
 
   # Setup ----------------------------------------------------------------------
-  # Get the metadata and set `cifti_target_fname` if NULL.
-  # Also write out the CIFTI and get the surfaces present if x is a "xifti"
   if (input_is_xifti) {
-
-    # Get metadata.
-    cifti_info <- x$meta
-    ## Get Intent.
+    # Check intent. Treat unknown intents as dscalar.
     x_intent <- x$meta$cifti$intent
     if (!is.null(x_intent) && (x_intent %in% supported_intents()$value)) {
       x_extn <- supported_intents()$extension[supported_intents()$value == x_intent]
@@ -59,72 +55,70 @@ smooth_cifti <- function(
       warning("The CIFTI intent was unknown, so smoothing as a dscalar.")
       x_extn <- "dscalar.nii"
     }
-    ## Get brainstructures.
-    brainstructures <- x$meta$cifti$brainstructures
-    if (is.null(brainstructures)) {
-      brainstructures <- vector("character", 0)
-      if (!is.null(x$data$cortex_left)) { brainstructures <- c(brainstructures, "left") }
-      if (!is.null(x$data$cortex_right)) { brainstructures <- c(brainstructures, "right") }
-      if (!is.null(x$data$subcort)) { brainstructures <- c(brainstructures, "subcortical") }
-    }
 
     # Write out the CIFTI.
     cifti_original_fname <- file.path(tempdir(), paste0("to_smooth.", x_extn))
     write_cifti(x, cifti_original_fname, verbose=FALSE)
 
-    # Set the target CIFTI file name if null.
+    # Set the target CIFTI file name.
     if (is.null(cifti_target_fname)) {
       cifti_target_fname <- gsub(
-        "to_smooth.", "smoothed.", 
-        cifti_original_fname, fixed=TRUE
+        "to_smooth.", "smoothed.", cifti_original_fname, fixed=TRUE
       )
     }
 
     # Get the surfaces present.
     if (is.null(surfL_fname) && !is.null(x$surf$cortex_left)) {
+      surfL_return <- TRUE
       surfL_fname <- file.path(tempdir(), "left.surf.gii")
       write_surf_gifti(x$surf$cortex_left, surfL_fname, hemisphere="left")
     }
     if (is.null(surfR_fname) && !is.null(x$surf$cortex_right)) {
+      surfR_return <- TRUE
       surfR_fname <- file.path(tempdir(), "right.surf.gii")
       write_surf_gifti(x$surf$cortex_right, surfR_fname, hemisphere="right")
     }
 
+    cifti_info <- x$meta
+    brainstructures <- vector("character")
+    if (!is.null(x$data$cortex_left)) { brainstructures <- c(brainstructures, "left") }
+    if (!is.null(x$data$cortex_right)) { brainstructures <- c(brainstructures, "right") }
+    if (!is.null(x$data$subcort)) { brainstructures <- c(brainstructures, "subcort") }
+  
   } else {
+    # Check that the original file is valid.
     cifti_original_fname <- x
     stopifnot(file.exists(cifti_original_fname))
-    # Get metadata.
     cifti_info <- info_cifti(cifti_original_fname)
-    ## Get brainstructures.
     brainstructures <- cifti_info$cifti$brainstructures
-    # Set the target CIFTI file name if null.
+    # Set the target CIFTI file name.
     if (is.null(cifti_target_fname)) {
-      cifti_target_fname <- file.path(tempdir(), basename(cifti_original_fname))
+      cifti_target_fname <- file.path(
+        getwd(), paste0("smoothed.", get_cifti_extn(cifti_original_fname))
+      )
     }
   }
 
-  # If the input is a .dlabel file, the target should be .dscalar not .dlabel.
+  # If the input is a .dlabel file, the target should be .dscalar not .dlabel. -
   fix_dlabel <- FALSE
-  if (!is.null(cifti_info$cifti$intent)) {
-    if (cifti_info$cifti$intent == 3007) {
-      warning(paste(
-        "Smoothing a label file will convert the labels to their numeric",
-        "indices. Coercing `cifti_target_fname` to a \".dscalar\" file.\n"
-      ))
-      fix_dlabel <- TRUE
-      cifti_target_fname <- gsub(
-        "dlabel.nii", "dscalar.nii", 
-        cifti_target_fname, fixed=TRUE
-      )
-    }
+  if (!is.null(cifti_info$cifti$intent) && cifti_info$cifti$intent == 3007) {
+    warning(paste(
+      "Smoothing a label file will convert the labels to their numeric",
+      "indices. Coercing `cifti_target_fname` to a \".dscalar\" file.\n"
+    ))
+    fix_dlabel <- TRUE
+    cifti_target_fname <- gsub(
+      "dlabel.nii", "dscalar.nii", 
+      cifti_target_fname, fixed=TRUE
+    )
   }
 
   # Build the Connectome Workbench command. 
   cmd <- paste(
     "-cifti-smoothing", 
     sys_path(cifti_original_fname), 
-    surface_sigma,
-    volume_sigma,
+    surf_FWHM / (2*sqrt(2*log(2))),
+    vol_FWHM / (2*sqrt(2*log(2))),
     "COLUMN",
     sys_path(cifti_target_fname)
   )
@@ -222,7 +216,7 @@ smooth_cifti <- function(
 
   if (subcortical_merged) { cmd <- paste(cmd, "-merged-volume") }
 
-  run_wb_cmd(cmd, wb_path)
+  run_wb_cmd(cmd)
 
   # Fix .dlabel output ---------------------------------------------------------
   if (fix_dlabel) {
@@ -230,19 +224,22 @@ smooth_cifti <- function(
     cifti_target_fname <- gsub("dlabel", "dscalar", old_target_fname)
     names_fname <- tempfile()
     cat(names(cifti_info$cifti$labels), file = names_fname, sep = "\n")
-    run_wb_cmd(
-      paste(
-        "-cifti-change-mapping", old_target_fname, 
-        "ROW", cifti_target_fname,
-        "-scalar", "-name-file", names_fname
-      ),
-      wb_path
-    )
+    run_wb_cmd(paste(
+      "-cifti-change-mapping", old_target_fname, 
+      "ROW", cifti_target_fname,
+      "-scalar", "-name-file", names_fname
+    ))
   }
   
   # Return results -------------------------------------------------------------
   if (input_is_xifti) {
-    return(read_xifti(cifti_target_fname, brainstructures=brainstructures))
+    read_xifti_args <- list(
+      cifti_fname = cifti_target_fname, 
+      brainstructures = brainstructures
+    )
+    if (surfL_return) { read_xifti_args$surfL_fname <- surfL_fname }
+    if (surfR_return) { read_xifti_args$surfR_fname <- surfR_fname }
+    return(do.call(read_xifti, read_xifti_args))
   } else {
     return(invisible(cifti_target_fname))
   }
@@ -251,39 +248,53 @@ smooth_cifti <- function(
 #' @rdname smooth_cifti
 #' @export
 smoothCIfTI <- function(
-  x, cifti_target_fname,
-  surface_sigma, volume_sigma,
+  x, cifti_target_fname=NULL,
+  surf_FWHM=5, vol_FWHM=5,
   surfL_fname=NULL, surfR_fname=NULL, cerebellum_fname=NULL,
   subcortical_zeroes_as_NA=FALSE, cortical_zeroes_as_NA=FALSE,
-  subcortical_merged=FALSE,
-  wb_path=NULL){
+  subcortical_merged=FALSE){
 
   smooth_cifti(
     x=x, cifti_target_fname=cifti_target_fname,
-    surface_sigma=surface_sigma, volume_sigma=volume_sigma,
+    surf_FWHM=surf_FWHM, vol_FWHM=vol_FWHM,
     surfL_fname=surfL_fname, surfR_fname=surfR_fname, cerebellum_fname=cerebellum_fname,
     subcortical_zeroes_as_NA=subcortical_zeroes_as_NA, cortical_zeroes_as_NA=cortical_zeroes_as_NA,
-    subcortical_merged=subcortical_merged,
-    wb_path=wb_path
+    subcortical_merged=subcortical_merged
   )
 }
 
 #' @rdname smooth_cifti
 #' @export
 smoothcii <- function(
-  x, cifti_target_fname,
-  surface_sigma, volume_sigma,
+  x, cifti_target_fname=NULL,
+  surf_FWHM=5, vol_FWHM=5,
   surfL_fname=NULL, surfR_fname=NULL, cerebellum_fname=NULL,
   subcortical_zeroes_as_NA=FALSE, cortical_zeroes_as_NA=FALSE,
-  subcortical_merged=FALSE,
-  wb_path=NULL){
+  subcortical_merged=FALSE){
 
   smooth_cifti(
     x=x, cifti_target_fname=cifti_target_fname,
-    surface_sigma=surface_sigma, volume_sigma=volume_sigma,
+    surf_FWHM=surf_FWHM, vol_FWHM=vol_FWHM,
     surfL_fname=surfL_fname, surfR_fname=surfR_fname, cerebellum_fname=cerebellum_fname,
     subcortical_zeroes_as_NA=subcortical_zeroes_as_NA, cortical_zeroes_as_NA=cortical_zeroes_as_NA,
-    subcortical_merged=subcortical_merged,
-    wb_path=wb_path
+    subcortical_merged=subcortical_merged
+  )
+}
+
+#' @rdname smooth_cifti
+#' @export
+smooth_xifti <- function(
+  x, cifti_target_fname=NULL,
+  surf_FWHM=5, vol_FWHM=5,
+  surfL_fname=NULL, surfR_fname=NULL, cerebellum_fname=NULL,
+  subcortical_zeroes_as_NA=FALSE, cortical_zeroes_as_NA=FALSE,
+  subcortical_merged=FALSE){
+
+  smooth_cifti(
+    x=x, cifti_target_fname=cifti_target_fname,
+    surf_FWHM=surf_FWHM, vol_FWHM=vol_FWHM,
+    surfL_fname=surfL_fname, surfR_fname=surfR_fname, cerebellum_fname=cerebellum_fname,
+    subcortical_zeroes_as_NA=subcortical_zeroes_as_NA, cortical_zeroes_as_NA=cortical_zeroes_as_NA,
+    subcortical_merged=subcortical_merged
   )
 }

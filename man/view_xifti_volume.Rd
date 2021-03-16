@@ -13,9 +13,8 @@ view_xifti_volume(
   idx = 1,
   plane = c("axial", "sagittal", "coronal"),
   num.slices = 9,
-  use_papaya = FALSE,
-  z_min = NULL,
-  z_max = NULL,
+  interactive = FALSE,
+  zlim = NULL,
   verbose = TRUE,
   ...
 )
@@ -26,9 +25,8 @@ view_cifti_volume(
   idx = 1,
   plane = c("axial", "sagittal", "coronal"),
   num.slices = 9,
-  use_papaya = FALSE,
-  z_min = NULL,
-  z_max = NULL,
+  interactive = FALSE,
+  zlim = NULL,
   verbose = TRUE,
   ...
 )
@@ -39,9 +37,8 @@ viewCIfTI_volume(
   idx = 1,
   plane = c("axial", "sagittal", "coronal"),
   num.slices = 9,
-  use_papaya = FALSE,
-  z_min = NULL,
-  z_max = NULL,
+  interactive = FALSE,
+  zlim = NULL,
   verbose = TRUE,
   ...
 )
@@ -52,35 +49,35 @@ viewcii_volume(
   idx = 1,
   plane = c("axial", "sagittal", "coronal"),
   num.slices = 9,
-  use_papaya = FALSE,
-  z_min = NULL,
-  z_max = NULL,
+  interactive = FALSE,
+  zlim = NULL,
   verbose = TRUE,
   ...
 )
 }
 \arguments{
-\item{xifti}{Object of class "xifti". 
+\item{xifti}{Object of class "xifti".
 See \code{\link{is.xifti}} and \code{\link{make_xifti}}.}
 
 \item{structural_img}{The structural MRI image on which to overlay the
 subcortical values. Can be a file name, \code{"MNI"} (default) to use
 the MNI T1-weighted template, or \code{NULL} to use a blank image.}
 
-\item{idx}{The time/column index of the \code{"xifti"} data to plot.}
+\item{idx}{The time/column index of the \code{"xifti"} data to plot. Must
+be a single index (length 1).}
 
-\item{plane}{If use_papaya=FALSE, the plane to display.
-Default: \code{"axial"}. Other options are \code{"sagittal"} and 
+\item{plane}{If interactive=FALSE, the plane to display.
+Default: \code{"axial"}. Other options are \code{"sagittal"} and
 \code{"coronal"}.}
 
-\item{num.slices}{If use_papaya=FALSE, the number of slices to display.
+\item{num.slices}{If interactive=FALSE, the number of slices to display.
 Default: \code{9}.}
 
-\item{use_papaya}{use_papaya=TRUE will use papayar to allows for interactive visualization.}
+\item{interactive}{interactive=TRUE will use papayar to allows for interactive visualization.}
 
-\item{z_min}{Floor value.}
-
-\item{z_max}{Ceiling value.}
+\item{zlim}{A length-2 numeric vector giving the minimum and maximum values to
+plot. Data values beyond this range will be truncated to the min/max. If
+\code{NULL} (default), will use the min and max of the data.}
 
 \item{verbose}{Should occasional updates be printed? Default: \code{TRUE}.}
 

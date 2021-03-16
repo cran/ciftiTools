@@ -1,6 +1,6 @@
 #' Read a CIFTI file
 #' 
-#' Read a CIFTI file as a \code{"xifti"} object (see \code{\link{is.xifti}}).
+#' Read a CIFTI file as a \code{"xifti"} object.
 #' 
 #' First, metadata is obtained with \code{\link{info_cifti}}. Then, if no 
 #'  resampling is requested, the \code{-cifti-convert -to-gifti-ext} Workbench 
@@ -18,7 +18,14 @@
 #' @inheritSection labels_Description Label Levels
 #' 
 #' @inheritParams cifti_fname_Param
-#' @param flat Should the result be flattened into a single matrix? 
+#' @inheritParams surfL_fname_Param
+#' @inheritParams surfR_fname_Param
+#' @inheritParams brainstructures_Param_LR 
+#' @param resamp_res Resolution to resample the cortical data and surface to.
+#'  Default: \code{NULL} (do not resample). If not \code{NULL}, the data will 
+#'  have to be read in with \code{-cifti-separate}, which is slower than 
+#'  \code{-cifti-convert -to-gifti-ext}.
+#' @param flat Should the result be flattened into a single matrix?
 #' 
 #'  If \code{FALSE} (default), the result will be a \code{"xifti"} object.
 #' 
@@ -34,18 +41,10 @@
 #'  label. However, where each brainstructure (and subcortical structure) begins
 #'  and ends cannot be determined. The medial wall locations and subcortical 
 #'  brain mask are also not included. The data matrix will be identical to that 
-#'  created by \code{-cifti-convert -to-gifti-ext}.
-#' @inheritParams surfL_fname_Param
-#' @inheritParams surfR_fname_Param
-#' @inheritParams brainstructures_Param_LR 
-#' @param resamp_res Resolution to resample the cortical data and surface to.
-#'  Default: \code{NULL} (do not resample). If not \code{NULL}, the data will 
-#'  have to be read in with \code{-cifti-separate}, which is slower than 
-#'  \code{-cifti-convert -to-gifti-ext}.
+#'  created by \code{-cifti-convert -to-gifti-ext}. 
 #' @param mwall_values If the medial wall locations are not indicated in the
 #'  CIFTI, use these values to infer the medial wall mask. Default: 
 #'  \code{c(NA, NaN)}. If \code{NULL}, do not attempt to infer the medial wall.
-#' @inheritParams wb_path_Param
 #' @inheritParams verbose_Param_FALSE
 #' @param ... Additional arguments to \code{\link{read_cifti_convert}} or 
 #'  \code{\link{read_cifti_separate}}.
@@ -56,12 +55,11 @@
 #' @export
 #'
 read_cifti <- function(
-  cifti_fname=NULL, flat=FALSE,
+  cifti_fname=NULL,
   surfL_fname=NULL, surfR_fname=NULL,
   brainstructures=c("left","right"), 
-  resamp_res=NULL,
-  mwall_values=c(NA, NaN),
-  wb_path=NULL, verbose=FALSE, ...){
+  resamp_res=NULL, flat=FALSE,
+  mwall_values=c(NA, NaN), verbose=FALSE, ...){
 
   if (is.null(cifti_fname)) {
     if (is.null(surfL_fname) && is.null(surfR_fname)) {
@@ -70,6 +68,14 @@ read_cifti <- function(
     } else {
       xifti <- template_xifti()
       xifti <- add_surf(xifti, surfL=surfL_fname, surfR=surfR_fname)
+      if (!is.null(resamp_res)) {
+        if (!is.null(xifti$surf$cortex_lef)) {
+          xifti$surf$cortex_left <- resample_surf(xifti$surf$cortex_left, resamp_res, "left")
+        }
+        if (!is.null(xifti$surf$cortex_right)) {
+          xifti$surf$cortex_right <- resample_surf(xifti$surf$cortex_right, resamp_res, "right")
+        }
+      }
       return(xifti)
     }
   }
@@ -85,7 +91,7 @@ read_cifti <- function(
         "Ignoring `resamp_res`.\n"
       ))
     }
-    return( read_cifti_flat(cifti_fname, wb_path=wb_path) )
+    return( read_cifti_flat(cifti_fname) )
   }
 
   # ----------------------------------------------------------------------------
@@ -111,8 +117,7 @@ read_cifti <- function(
       cifti_fname,
       surfL_fname=surfL_fname, surfR_fname=surfR_fname,
       brainstructures=brainstructures, 
-      mwall_values=mwall_values,
-      wb_path=wb_path, verbose=verbose,
+      mwall_values=mwall_values, verbose=verbose,
       ...
     ))
 
@@ -122,8 +127,7 @@ read_cifti <- function(
       surfL_fname=surfL_fname, surfR_fname=surfR_fname,
       brainstructures=brainstructures, 
       resamp_res=resamp_res, 
-      mwall_values=mwall_values,
-      wb_path=wb_path, verbose=verbose,
+      mwall_values=mwall_values, verbose=verbose,
       ...
     ))
   }
@@ -132,56 +136,53 @@ read_cifti <- function(
 #' @rdname read_cifti
 #' @export
 readCIfTI <- function(
-  cifti_fname, flat=FALSE,
+  cifti_fname=NULL,
   surfL_fname=NULL, surfR_fname=NULL,
   brainstructures=c("left","right"), 
-  resamp_res=NULL,
-  mwall_values=c(NA, NaN),
-  wb_path=NULL, verbose=FALSE, ...){
+  resamp_res=NULL, flat=FALSE,
+  mwall_values=c(NA, NaN), verbose=FALSE, ...){
 
   read_cifti(
-    cifti_fname=cifti_fname, flat=flat,
+    cifti_fname=cifti_fname,
     surfL_fname=surfL_fname, surfR_fname=surfR_fname,
     brainstructures=brainstructures, 
-    resamp_res=resamp_res, mwall_values=mwall_values,
-    wb_path=wb_path, verbose=verbose, ...
+    resamp_res=resamp_res, flat=flat, 
+    mwall_values=mwall_values, verbose=verbose, ...
   )
 }
 
 #' @rdname read_cifti
 #' @export
 readcii <- function(
-  cifti_fname, flat=FALSE,
+  cifti_fname=NULL,
   surfL_fname=NULL, surfR_fname=NULL,
   brainstructures=c("left","right"), 
-  resamp_res=NULL,
-  mwall_values=c(NA, NaN),
-  wb_path=NULL, verbose=FALSE, ...){
+  resamp_res=NULL, flat=FALSE,
+  mwall_values=c(NA, NaN), verbose=FALSE, ...){
 
   read_cifti(
-    cifti_fname=cifti_fname, flat=flat,
+    cifti_fname=cifti_fname,
     surfL_fname=surfL_fname, surfR_fname=surfR_fname,
     brainstructures=brainstructures, 
-    resamp_res=resamp_res, mwall_values=mwall_values,
-    wb_path=wb_path, verbose=verbose, ...
+    resamp_res=resamp_res, flat=flat, 
+    mwall_values=mwall_values, verbose=verbose, ...
   )
 }
 
 #' @rdname read_cifti
 #' @export
 read_xifti <- function(
-  cifti_fname, flat=FALSE,
+  cifti_fname=NULL,
   surfL_fname=NULL, surfR_fname=NULL,
   brainstructures=c("left","right"), 
-  resamp_res=NULL,
-  mwall_values=c(NA, NaN),
-  wb_path=NULL, verbose=FALSE, ...){
+  resamp_res=NULL, flat=FALSE,
+  mwall_values=c(NA, NaN), verbose=FALSE, ...){
 
   read_cifti(
-    cifti_fname=cifti_fname, flat=flat,
+    cifti_fname=cifti_fname,
     surfL_fname=surfL_fname, surfR_fname=surfR_fname,
     brainstructures=brainstructures, 
-    resamp_res=resamp_res, mwall_values=mwall_values,
-    wb_path=wb_path, verbose=verbose, ...
+    resamp_res=resamp_res, flat=flat, 
+    mwall_values=mwall_values, verbose=verbose, ...
   )
 }

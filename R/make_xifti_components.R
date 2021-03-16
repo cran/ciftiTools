@@ -2,8 +2,8 @@
 #' 
 #' Coerce a path to a GIFTI file, metric "gifti" object, data matrix or vector to a 
 #'  data matrix representing cortical data (and optionally a corresponding mask). 
-#'  That is,  entries for \code{xifti$data$cortex_[left/right]} and 
-#'  \code{xifti$meta$cortex$medial_wall_mask$[left/right]}. If \code{cortex} is
+#'  That is,  entries for \code{xifti$data$cortex_\[left/right\]} and 
+#'  \code{xifti$meta$cortex$medial_wall_mask$\[left/right\]}. If \code{cortex} is
 #'  a path to a GIFTI file or a metric "gifti" object, any column names or
 #'  a non-empty label table will also be extracted.
 #' 
@@ -61,7 +61,7 @@ make_cortex <- function(
   col_names <- label_table <- NULL
 
   # Cannot infer the medial wall if the cortex has been masked.
-  infer_mwall <- !identical(mwall_values, NULL)
+  infer_mwall <- !is.null(mwall_values)
   if (!is.null(cortex_is_masked) && cortex_is_masked) { infer_mwall <- FALSE }
 
   # Cortex:
@@ -207,6 +207,9 @@ make_cortex <- function(
   if (!is.null(mwall)) {
     if (is.null(cortex_is_masked)) { cortex_is_masked <- FALSE }
     if (!cortex_is_masked) {
+      if (nrow(cortex) != length(mwall)) { 
+        stop("Cortex and medial wall have different numbers of data locations.")
+      }
       cortex <- cortex[mwall,, drop=FALSE]
       cortex_is_masked <- TRUE
     }

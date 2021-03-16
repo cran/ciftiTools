@@ -2,12 +2,12 @@
 % Please edit documentation in R/view_xifti_surface.R
 \name{view_xifti_surface.surf_hemi}
 \alias{view_xifti_surface.surf_hemi}
-\title{Sort out surface & hemispehre args for \code{view_xifti_surface}}
+\title{Sort out surface & hemisphere args for \code{view_xifti_surface}}
 \usage{
 view_xifti_surface.surf_hemi(xifti, surfL, surfR, hemisphere)
 }
 \arguments{
-\item{xifti}{The xifti}
+\item{xifti}{The \code{"xifti"}}
 
 \item{surfL}{Left surface}
 

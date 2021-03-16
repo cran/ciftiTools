@@ -8,198 +8,114 @@
 \title{Resample CIFTI Data}
 \usage{
 resample_cifti(
-  cifti_original_fname,
-  cifti_target_fname,
+  x = NULL,
+  cifti_target_fname = NULL,
   surfL_original_fname = NULL,
   surfR_original_fname = NULL,
   surfL_target_fname = NULL,
   surfR_target_fname = NULL,
   resamp_res,
-  sep_keep = FALSE,
-  sep_fnames = NULL,
-  resamp_keep = FALSE,
-  resamp_fnames = NULL,
   write_dir = NULL,
   mwall_values = c(NA, NaN),
-  verbose = TRUE,
-  wb_path = NULL
+  verbose = TRUE
 )
 
 resampleCIfTI(
-  cifti_original_fname,
-  cifti_target_fname,
+  x = NULL,
+  cifti_target_fname = NULL,
   surfL_original_fname = NULL,
   surfR_original_fname = NULL,
   surfL_target_fname = NULL,
   surfR_target_fname = NULL,
   resamp_res,
-  sep_keep = FALSE,
-  sep_fnames = NULL,
-  resamp_keep = FALSE,
-  resamp_fnames = NULL,
   write_dir = NULL,
   mwall_values = c(NA, NaN),
-  verbose = TRUE,
-  wb_path = NULL
+  verbose = TRUE
 )
 
 resamplecii(
-  cifti_original_fname,
-  cifti_target_fname,
+  x = NULL,
+  cifti_target_fname = NULL,
   surfL_original_fname = NULL,
   surfR_original_fname = NULL,
   surfL_target_fname = NULL,
   surfR_target_fname = NULL,
   resamp_res,
-  sep_keep = FALSE,
-  sep_fnames = NULL,
-  resamp_keep = FALSE,
-  resamp_fnames = NULL,
   write_dir = NULL,
   mwall_values = c(NA, NaN),
-  verbose = TRUE,
-  wb_path = NULL
+  verbose = TRUE
 )
 
 resample_xifti(
-  cifti_original_fname,
-  cifti_target_fname,
+  x = NULL,
+  cifti_target_fname = NULL,
   surfL_original_fname = NULL,
   surfR_original_fname = NULL,
   surfL_target_fname = NULL,
   surfR_target_fname = NULL,
   resamp_res,
-  sep_keep = FALSE,
-  sep_fnames = NULL,
-  resamp_keep = FALSE,
-  resamp_fnames = NULL,
   write_dir = NULL,
   mwall_values = c(NA, NaN),
-  verbose = TRUE,
-  wb_path = NULL
+  verbose = TRUE
 )
 }
 \arguments{
-\item{cifti_original_fname}{A CIFTI file to resample.}
+\item{x}{The CIFTI file name or \code{"xifti"} object to resample. If
+\code{NULL}, the result will be a \code{"xifti"} with resampled surfaces
+given by \code{surfL_original_fname} and \code{surfR_original_fname}.}
 
-\item{cifti_target_fname}{The file name to save the resampled CIFTI.}
+\item{cifti_target_fname}{File name for the resampled CIFTI. Will be placed
+in \code{write_dir}. If \code{NULL}, will be written to "resampled.d*.nii".
+\code{write_dir} will be appended to the beginning of the path.}
 
-\item{surfL_original_fname, surfR_original_fname}{(Optional) File path of 
-existing GIFTI surface geometry file representing the left/right cortex. 
-One or both can be provided. These will be resampled too, and are convenient
-for visualizing the resampled data.}
+\item{surfL_original_fname, surfR_original_fname}{(Optional) Path to a GIFTI
+surface geometry file representing the left/right cortex. One or both can be
+provided. These will be resampled too, and are convenient for visualizing
+the resampled data.
 
-\item{surfL_target_fname, surfR_target_fname}{(Optional) File path for
-the resampled GIFTI surface geometry file representing the left/right 
-cortex. If NULL (default), will use default names: see 
-\code{resample_cifti_default_fname}.}
+If \code{x} is a \code{"xifti"} object with surfaces, these arguments
+will override the surfaces in the \code{"xifti"}.}
 
-\item{resamp_res}{Target resolution for resampling (number of 
+\item{surfL_target_fname, surfR_target_fname}{(Optional) File names for the
+resampled GIFTI surface geometry files. Will be placed in \code{write_dir}.
+If \code{NULL} (default), will use default names created by
+\code{\link{resample_cifti_default_fname}}.}
+
+\item{resamp_res}{Target resolution for resampling (number of
 cortical surface vertices per hemisphere).}
 
-\item{sep_keep}{If separated files are created, should they be kept or 
-deleted at the end of this function call? Default: \code{FALSE} (delete).
-Keeping the separated files may help speed up certain tasks, for example
-when repeatedly iterating over subjects--the CIFTI will only be separated
-once instead of at each iteration.}
-
-\item{sep_fnames}{(Optional) Where to write the separated files (override
- their default file names). This is a named list 
- where each entry's name is a file type label, and each entry's value
- is a file name indicating where to write the corresponding separated file. 
- The recognized file type labels are: "cortexL", "cortexR", 
- "ROIcortexL", "ROIcortexR", "subcortVol", and "subcortLabs".
- 
- Entry values can be \code{NULL}, in which case a default file name will be 
- used: see \code{\link{cifti_component_suffix}}. Default file names
- will also be used for files that need to be separated/written but without a
- corresponding entry in \code{sep_fnames}.
- 
- Entries in \code{sep_fnames} will be ignored if they are not needed
- based on \code{[ROI_]brainstructures}. For example, if
- \code{brainstructures="left"}, then \code{sep_fnames$cortexR} will be 
- ignored if specified. 
-
- The \code{write_dir} argument can be used to place each separated file in
- the same directory.}
-
-\item{resamp_keep}{If resampled files are created, will they be kept or 
-deleted at the end of this function call? Default: \code{FALSE} (delete).
-Keeping the resampled files may help speed up certain tasks, for example
-when repeatedly iterating over CIFTI files--resampling will only be done
-once instead of every new iteration.}
-
-\item{resamp_fnames}{Where to write the resampled files. This is a named list 
- where each entry's name is a file type label, and each entry's value
- is a file name indicating where to write the corresponding resampled file. 
- The recognized file type labels are: "cortexL", "cortexR", 
- "ROIcortexL", "ROIcortexR", "validROIcortexL", and "validROIcortexR".
- 
- Entry values can be \code{NULL}, in which case a default file name will be 
- used: see \code{\link{resample_cifti_default_fname}}. Default file names
- will also be used for files that need to be resampled/written but without a
- corresponding entry in \code{resamp_fnames}.
- 
- Entries in \code{resamp_fnames} will be ignored if they are not needed
- based on \code{[ROI_]brainstructures}. For example, if
- \code{brainstructures="left"}, then \code{resamp_fnames$cortexR} will be 
- ignored if specified. 
-
- The \code{write_dir} argument can be used to place each resampled file in
- the same directory.}
-
-\item{write_dir}{Where should any output files be written? \code{NULL}
- (default) will write them to the current working directory.
-
- Files flagged for deletion will be written to a temporary directory, and
- thus are not affected by this argument. So if \code{sep_keep} is 
- \code{TRUE}, the separated files will be written to \code{write_dir}, but if
- \code{sep_keep} is \code{FALSE}, they will be written to \code{tempdir()} 
- and later deleted. \code{resamp_keep} works similarly. 
-
- For \code{read_cifti_separate}, the surface files (\code{surfL} or \code{surfR})
- are deleted if \code{resamp_keep} is \code{FALSE}, so in this case they will
- be written to \code{tempdir()}. But for \code{resample_cifti}, the
- surface files are kept even if \code{resamp_keep} is \code{FALSE}, so they 
- will always be written to \code{write_dir}. 
-
- Different subfolders for the separated, resampled, and final output files
- cannot be specified by \code{write_dir}. Instead, modify the individual file
- names in \code{sep_fnames} and \code{resamp_fnames}.
-
- \code{write_dir} must already exist, or an error will occur.}
+\item{write_dir}{Where to write the resampled CIFTI (and surfaces if present.)
+If \code{NULL} (default), will use the current working directory if \code{x}
+was a CIFTI file, and a temporary directory if \code{x} was a \code{"xifti"}
+object.}
 
 \item{mwall_values}{If the medial wall locations are not indicated in the
- CIFTI, use these values to infer the medial wall mask. Default: 
- \code{c(NA, NaN)}. If \code{NULL}, do not attempt to infer the medial wall.
+CIFTI, use these values to infer the medial wall mask. Default:
+\code{c(NA, NaN)}. If \code{NULL}, do not attempt to infer the medial wall.
 
- Correctly indicating the medial wall locations is important for resampling,
- because the medial wall mask is taken into account during resampling
- calculations.}
+Correctly indicating the medial wall locations is important for resampling,
+because the medial wall mask is taken into account during resampling
+calculations.}
 
 \item{verbose}{Should occasional updates be printed? Default: \code{TRUE}.}
-
-\item{wb_path}{(Optional) Path to Connectome Workbench folder or executable. 
-If not provided, should be set with 
-\code{ciftiTools.setOption("wb_path", "path/to/workbench")}.}
 }
 \value{
 A named character vector of written files: \code{"cifti"} and
- potentially \code{"surfL"} (if \code{surfL_original_fname} was provided) 
- and/or \code{"surfR"} (if \code{surfR_original_fname} was provided).
+potentially \code{"surfL"} (if \code{surfL_original_fname} was provided)
+and/or \code{"surfR"} (if \code{surfR_original_fname} was provided).
 }
 \description{
 Performs spatial resampling of CIFTI data on the cortical surface
- by separating it into GIFTI and NIFTI files, resampling the GIFTIs, and then 
- putting them together. (The subcortex is not resampled.)
+by separating it into GIFTI and NIFTI files, resampling the GIFTIs, and then
+putting them together. (The subcortex is not resampled.)
+}
+\details{
+Can accept a \code{"xifti"} object as well as a path to a CIFTI-file.
 }
 \section{Connectome Workbench Requirement}{
 
- This function uses a system wrapper for the 'wb_command' executable. The 
- user must first download and install the Connectome Workbench, available 
- from https://www.humanconnectome.org/software/get-connectome-workbench . 
- The \code{wb_path} argument is the full file path to the Connectome 
- Workbench folder. (The full file path to the 'wb_cmd' executable also 
- works.)
+This function uses a system wrapper for the 'wb_command' executable. The
+user must first download and install the Connectome Workbench, available
+from https://www.humanconnectome.org/software/get-connectome-workbench .
 }
 

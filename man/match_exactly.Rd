@@ -16,7 +16,7 @@ match_exactly(
 \item{expected}{Character vector of expected/allowed values.}
 
 \item{fail_action}{If any value in \code{user} could not be
-matched, or repeated matches occured, what should happen? Possible values
+matched, or repeated matches occurred, what should happen? Possible values
 are \code{"message"} (default), \code{"warning"}, \code{"stop"}, and
 \code{"nothing"}.}
 }
@@ -25,8 +25,8 @@ Logical. Do \code{user} and \code{expected} match?
 }
 \description{
 Checks if a user-defined character vector matches an expected character
- vector. That is, they share the same lengths and entries in the same order.
- For vectors of the same lengths, the result is \code{all(a == b)}.
+vector. That is, they share the same lengths and entries in the same order.
+For vectors of the same lengths, the result is \code{all(a == b)}.
 }
 \details{
 Attributes are ignored.

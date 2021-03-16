@@ -112,7 +112,7 @@ get_kwargs <- function(fun) {
 #'  correct one in \code{kwargsA}.
 #' @param labelA (Optional) Descriptor of \code{kwargsA} for error statement. Default "first kwarg(s)".
 #' @param labelB (Optional) Descriptor of \code{kwargsB} for error statement. Default "second kwarg(s)".
-#' @param extraMsg (Optional) Extra text for error statement. "[DEFAULT]" (default) will use this message:
+#' @param extraMsg (Optional) Extra text for error statement. "\[DEFAULT\]" (default) will use this message:
 #'  "Note that a kwarg only has to be provided to one of these. Place the correct value in the first
 #'  location and remove the kwarg from the second location".
 #'
@@ -161,7 +161,7 @@ merge_kwargs <- function(kwargsA, kwargsB,
 #'  \code{expected} using \code{match.arg()}.
 #' @param expected Character vector of expected/allowed values.
 #' @param fail_action If any value in \code{user} could not be
-#'  matched, or repeated matches occured, what should happen? Possible values
+#'  matched, or repeated matches occurred, what should happen? Possible values
 #'  are \code{"stop"} (default; raises an error), \code{"warning"}, and
 #'  \code{"nothing"}.
 #' @param user_value_label How to refer to the user input in a stop or warning
@@ -228,7 +228,7 @@ match_input <- function(
 #' @param user Character vector of user input. 
 #' @param expected Character vector of expected/allowed values.
 #' @param fail_action If any value in \code{user} could not be
-#'  matched, or repeated matches occured, what should happen? Possible values
+#'  matched, or repeated matches occurred, what should happen? Possible values
 #'  are \code{"message"} (default), \code{"warning"}, \code{"stop"}, and
 #'  \code{"nothing"}.
 #'
@@ -268,39 +268,6 @@ match_exactly <- function(
   )
 
   return(TRUE)
-}
-
-#' Wrapper for Connectome Workbench Commands
-#'
-#' Runs a Connectome Workbench command that has already been formatted.
-#'
-#' @param cmd The full command, beginning after the workbench path.
-#' @param intern Return printed output? If \code{FALSE} (default), return
-#'  logical indicating success instead.
-#' @inheritParams wb_path_Param
-#'
-#' @return If \code{intern==FALSE}, a logical indicating if the command finished successfully.
-#'  If \code{intern==TRUE}, the printed output of the command.
-#'
-run_wb_cmd <- function(cmd, wb_path, intern=FALSE){
-  wb_cmd <- get_wb_cmd_path(wb_path)
-  cmd <- paste(sys_path(wb_cmd), cmd)
-  
-  out <- system(cmd, intern=intern)
-
-  ciftiTools_msg("Using the Connectome Workbench.")
-
-  if (!intern) {
-    out <- out == 0
-    if (!out) {
-      message(paste0(
-        "The Connectome Workbench command failed with code ", out, 
-        ". The command was:\n", cmd
-      ))
-    }
-  }
-
-  invisible(out)
 }
 
 #' Print Suppressable Message
