@@ -84,8 +84,8 @@ transform_xifti <- function(xifti, FUN, xifti2=NULL) {
   # xifti + xifti
   } else {
     # Checks
-    bs1 <- names(xifti$data)[!as.logical(lapply(xifti$data, is.null))]
-    bs2 <- names(xifti2$data)[!as.logical(lapply(xifti2$data, is.null))]
+    bs1 <- names(xifti$data)[!vapply(xifti$data, is.null, FALSE)]
+    bs2 <- names(xifti2$data)[!vapply(xifti2$data, is.null, FALSE)]
     if (!identical(sort(bs1), sort(bs2))) {
       stop(
         "The first xifti had brainstructures ", paste(bs1, collapse=", "), ".\n",
@@ -117,7 +117,7 @@ transform_xifti <- function(xifti, FUN, xifti2=NULL) {
   # Convert from dlabel to dscalar if non-label values were introduced by
   #   the transformation function.
   if (!is.null(xifti$meta$cifti$intent) && xifti$meta$cifti$intent == 3007) {
-    v <- unique(do.call(rbind, xifti$data))
+    v <- unique(as.matrix(xifti))
     for (T_ in seq(ncol(v))) {
       if (!all(v[,T_] %in% xifti$meta$cifti$labels[[T_]]$Key)) {
         warning(

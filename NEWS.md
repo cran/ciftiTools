@@ -1,3 +1,42 @@
+# 3.1 (June 16, 2021)
+
+## Changes affecting users
+
+* `convert_xifti` accepts CIFTI files too
+* Add `as.matrix` S3 method
+* Fix interactive papayar view for `view_xifti_volume`
+
+## Notes for developers
+
+None
+# 3.0 (June 13, 2021)
+
+## Changes affecting users
+
+* Rename `concat_xifti` as `merge_xifti`
+* Rename `gifti_to_surf` as `read_surf`
+* Add `combine_xifti`
+* Add `convert_xifti` and make the individual conversion functions (e.g. `convert_to_dlabel`) internal
+* Add `smooth_gifti` for metric GIFTI smoothing
+* Add S3 method `dim` for `xifti` objects
+* Add `legend_alllevels` arg to `view_xifti_surface`
+* More control over legend file name in `view_xifti_surface`
+* Add intent to summary output
+* `write_xifti` will infer the intent/extension if not included in output file name
+## Notes for developers
+
+None
+
+# 2.2 (March 16, 2021)
+
+## Changes affecting users
+
+None
+
+## Notes for developers
+
+* Add `run_ciftiTools_tests.R` to `.Rbuildignore`
+
 # 2.1 (March 15, 2021)
 
 ## Changes affecting users

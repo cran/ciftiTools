@@ -1,7 +1,7 @@
 Package: ciftiTools
 Type: Package
 Title: Tools for Reading and Visualizing CIFTI Brain Files
-Version: 0.2.2
+Version: 0.3.1
 Authors@R: c(
     person(given = "Amanda",
            family = "Mejia",
@@ -10,7 +10,7 @@ Authors@R: c(
     person(given = "Damon",
            family = "Pham",
            email = "damondpham@gmail.com",
-           role = c("ctb"),
+           role = c("aut"),
            comment = c(ORCID = "0000-0001-7563-4727")))
 Maintainer: Amanda Mejia <mandy.mejia@gmail.com>
 Description: CIFTI files contain brain imaging data in "gray-ordinates", which 
@@ -23,7 +23,6 @@ Description: CIFTI files contain brain imaging data in "gray-ordinates", which
 Depends: R (>= 3.5.0)
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
 Imports: fields, gifti (> 0.7.5), grDevices, oro.nifti, RNifti,
         RColorBrewer, rgl, viridisLite, xml2
 Suggests: covr, ggplot2, ggpubr, htmlwidgets, knitr, rmarkdown,
@@ -32,8 +31,8 @@ RoxygenNote: 7.1.1
 URL: https://github.com/mandymejia/ciftiTools
 BugReports: https://github.com/mandymejia/ciftiTools/issues
 NeedsCompilation: no
-Packaged: 2021-03-16 00:38:56 UTC; damon
+Packaged: 2021-06-16 11:21:06 UTC; damon
 Author: Amanda Mejia [aut, cre],
-  Damon Pham [ctb] (<https://orcid.org/0000-0001-7563-4727>)
+  Damon Pham [aut] (<https://orcid.org/0000-0001-7563-4727>)
 Repository: CRAN
-Date/Publication: 2021-03-16 05:50:10 UTC
+Date/Publication: 2021-06-17 04:10:02 UTC

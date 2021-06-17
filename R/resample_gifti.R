@@ -1,4 +1,4 @@
-#' Resample a GIFTI file (with its ROI)
+#' Resample a metric GIFTI file (with its ROI)
 #'
 #' Performs spatial resampling of GIFTI data on the cortical surface.
 #'
@@ -89,8 +89,8 @@ resample_gifti <- function(
   if (is.null(original_res)) {
     gii <- readgii(original_fname)
     original_res <- switch(file_type,
-      metric = length(gii$data),
-      label = length(gii$data),
+      metric = nrow(gii$data[[1]]),
+      label = nrow(gii$data[[1]]),
       surface = nrow(gii$data$pointset)
     )
   } else {
@@ -209,9 +209,9 @@ resampleGIfTI <- function(
 
   resample_gifti(
     original_fname, target_fname, hemisphere,
-    file_type=NULL, original_res=NULL, resamp_res,
-    ROIcortex_original_fname=NULL, ROIcortex_target_fname=NULL,
-    read_dir=NULL, write_dir=NULL
+    file_type, original_res, resamp_res,
+    ROIcortex_original_fname, ROIcortex_target_fname,
+    read_dir, write_dir
   )
 }
 
@@ -225,8 +225,8 @@ resamplegii <- function(
 
   resample_gifti(
     original_fname, target_fname, hemisphere,
-    file_type=NULL, original_res=NULL, resamp_res,
-    ROIcortex_original_fname=NULL, ROIcortex_target_fname=NULL,
-    read_dir=NULL, write_dir=NULL
+    file_type, original_res, resamp_res,
+    ROIcortex_original_fname, ROIcortex_target_fname,
+    read_dir, write_dir
   )
 }
