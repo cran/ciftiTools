@@ -16,6 +16,7 @@ make_xifti(
   cifti_info = NULL,
   surfL = NULL,
   surfR = NULL,
+  idx = NULL,
   col_names = NULL,
   HCP_32k_auto_mwall = TRUE,
   read_dir = NULL,
@@ -106,6 +107,12 @@ GIFTI/NIFTI components \code{cifti_info} is not applicable.}
 Can be a surface GIFTI file path or \code{"surf"} object; see
 \code{\link{make_surf}} for a full description of valid inputs.}
 
+\item{idx}{For file paths provided to \code{cortexL}, \code{cortexR}, and
+\code{subcortVol}: a numeric matrix indicating the data indices to read. If\
+\code{NULL} (default), read all the data. Must be a subset of the indices
+present in the file, or an error will occur. Note that if these arguments
+are data matrices instead of file paths, they are unaffected.}
+
 \item{col_names}{Names of each measurement/column in the data. Overrides
 names indicated in \code{cifti_info} or in the data components.}
 
@@ -129,9 +136,7 @@ Assembles cortical data, subcortical data, and/or surface geometry to form a
 \code{"xifti"} object. The inputs can be file paths, GIFTI or NIFTI files
 which have been read in, or data objects (vectors, matrices or arrays,
 depending on the argument). See \code{as.xifti} for a user-function wrapper
-that only works with data objects. \code{make_xifti} can be used to combine
-the files written by \code{\link{separate_cifti}}, or read individual
-components independent of any CIFTI file.
+that only works with data objects.
 }
 \details{
 Each data or surface component is optional. Metadata components
@@ -181,7 +186,8 @@ the same for each brainstructure.
 }
 
 These correspond to the same structures as given by
-\code{ft_read_cifti} in the \code{cifti-matlab} MATLAB toolbox.
+\code{ft_read_cifti} in the \code{cifti-matlab} MATLAB toolbox. Note that
+the first two levels (left and right cortex) are not used.
 }
 
 \keyword{internal}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/write_gifti.R
 \name{write_metric_gifti}
 \alias{write_metric_gifti}
-\title{Write CIFTI cortex data to GIFTI}
+\title{Write a data matrix to a GIFTI metric file}
 \usage{
 write_metric_gifti(
   x,
@@ -67,3 +67,11 @@ Whether the GIFTI was successfully written
 \description{
 Write the data for the left or right cortex to a metric GIFTI file.
 }
+\seealso{
+Other functions for writing CIFTI or GIFTI metric data: 
+\code{\link{separate_cifti}()},
+\code{\link{write_cifti}()},
+\code{\link{write_subcort_nifti}()},
+\code{\link{write_surf_gifti}()}
+}
+\concept{writing}

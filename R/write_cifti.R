@@ -1,4 +1,4 @@
-#' Write CIFTI component files from a \code{"xifti"} object.
+#' Write CIFTI component files from a \code{"xifti"} object
 #'
 #' Write metric GIFTIs for the cortical surface data and NIFTIs for the
 #'  subcortical labels and mask in a \code{"xifti"} object. Each present
@@ -138,12 +138,10 @@ write_cifti_components <- function(
   invisible(sep_fnames)
 }
 
-#' Write a CIFTI file from a \code{"xifti"} object.
+#' Write a CIFTI file from a \code{"xifti"} object
 #'
 #' Write out a \code{"xifti"} object as a CIFTI file and (optionally) GIFTI 
 #'  surface files. 
-#' 
-#' @inheritSection Connectome_Workbench_Description Connectome Workbench Requirement
 #' 
 #' @inheritParams xifti_Param
 #' @inheritParams cifti_fname_Param
@@ -154,8 +152,15 @@ write_cifti_components <- function(
 #'
 #' @return Named character vector of the written files
 #' 
+#' @family common
+#' @family writing
 #' @export
 #'
+#' @section Connectome Workbench:
+#' This function interfaces with the \code{"-cifti-create-dense-timeseries"},
+#'  \code{"-cifti-create-dense-scalar"}, or \code{"-cifti-create-label"} Workbench
+#'  Command, depending on the input.
+#' 
 write_cifti <- function(
   xifti, cifti_fname, surfL_fname=NULL, surfR_fname=NULL,
   verbose=TRUE) {

@@ -2,11 +2,12 @@
 % Please edit documentation in R/make_xifti_components.R
 \name{make_cortex}
 \alias{make_cortex}
-\title{Make \code{"xifti"} cortical components}
+\title{Make the cortical components of a \code{"xifti"}}
 \usage{
 make_cortex(
   cortex,
   mwall = NULL,
+  idx = NULL,
   cortex_is_masked = NULL,
   rm_blank_mwall = TRUE,
   rm_bad_mwall = TRUE,
@@ -16,18 +17,23 @@ make_cortex(
 )
 }
 \arguments{
-\item{cortex}{A path to a metric GIFTI file, metric \code{"gifti"} object, or
+\item{cortex}{A path to a metric GIFTI file, metric \code{"gifti"}, or
 numeric vector/matrix representing cortical data.
 
-If \code{cortex} is a path to a metric GIFTI file or metric \code{"gifti"}
-object, the column names and the label table will also be extracted if they
+If \code{cortex} is a path to a metric GIFTI file or metric \code{"gifti"},
+the column names and the label table will also be extracted if they
 exist in the GIFTI.}
 
-\item{mwall}{A path to a metric GIFTI file, metric \code{"gifti"} object,
+\item{mwall}{A path to a metric GIFTI file, metric \code{"gifti"},
 \eqn{V_{[L/R]} x 1} logical matrix or length \eqn{V_{[L/R]}} logical vector
 representing the medial wall mask. \code{FALSE} values should indicate
 vertices that make up the medial wall. If the medial wall is unknown, use
 \code{NULL} (default).}
+
+\item{idx}{Only applies if \code{cortex} is a metric GIFTI file path. This is
+a numeric vector indicating the data indices to read. If \code{NULL}
+(default), read all the data. Must be a subset of the indices present in the
+file, or an error will occur.}
 
 \item{cortex_is_masked}{Has the medial wall been masked from \code{cortex}
 yet? \code{NULL} (default) indicates whether it has been masked or not is
@@ -60,11 +66,11 @@ to print warnings.}
 A list with components "data", "mwall", "col_names" and "labels".
 }
 \description{
-Coerce a path to a GIFTI file, metric "gifti" object, data matrix or vector to a
+Coerce a path to a GIFTI file, metric \code{"gifti"} object, data matrix or vector to a
 data matrix representing cortical data (and optionally a corresponding mask).
 That is,  entries for \code{xifti$data$cortex_\[left/right\]} and
 \code{xifti$meta$cortex$medial_wall_mask$\[left/right\]}. If \code{cortex} is
-a path to a GIFTI file or a metric "gifti" object, any column names or
+a path to a GIFTI file or a metric \code{"gifti"}, any column names or
 a non-empty label table will also be extracted.
 }
 \keyword{internal}

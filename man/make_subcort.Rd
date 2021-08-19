@@ -2,9 +2,9 @@
 % Please edit documentation in R/make_xifti_components.R
 \name{make_subcort}
 \alias{make_subcort}
-\title{Make \code{"xifti"} subcortical components}
+\title{Make the subcortical components of a \code{"xifti"}}
 \usage{
-make_subcort(vol, labs, mask = NULL, validate_mask = FALSE)
+make_subcort(vol, labs, mask = NULL, idx = NULL, validate_mask = FALSE)
 }
 \arguments{
 \item{vol}{represents the data values of the subcortex. It is either a NIFTI
@@ -26,6 +26,11 @@ mask will be inferred from voxels with labels \code{0} or \code{NA} in
 \code{subcortLabs}. If \code{subcortLabs} are vectorized and \code{subcortMask}
 is not provided, the mask cannot be inferred so an error will occur.}
 
+\item{idx}{Only applies if \code{vol} is a NIFTI file path. This is a numeric
+vector indicating the data indices to read. If \code{NULL} (default), read
+all the data. Must be a subset of the indices present in the file, or an
+error will occur.}
+
 \item{validate_mask}{If \code{mask} is provided, set this to \code{TRUE} to
 check that the mask only removes voxels with \code{NA} and \code{0} values
 in \code{vol} and \code{labs}. Default: \code{FALSE} (saves time).}
@@ -35,8 +40,8 @@ A list with components "data", "labels", "mask", and "trans_mat". The
 first two will be vectorized and ordered spatially.
 
 The volume can be recovered using:
-\code{vol <- unmask_vol(data, mask, fill=NA)}
-\code{labs <- unmask_vol(labels, mask, fill=0)}
+\code{vol <- unmask_subcortex(data, mask, fill=NA)}
+\code{labs <- unmask_subcortex(labels, mask, fill=0)}
 }
 \description{
 Coerce subcortical data into valid entries for \code{xifti$data$subcort}
@@ -77,7 +82,8 @@ To read in the labels as the primary data, use the labels NIFTI for both
 }
 
 These correspond to the same structures as given by
-\code{ft_read_cifti} in the \code{cifti-matlab} MATLAB toolbox.
+\code{ft_read_cifti} in the \code{cifti-matlab} MATLAB toolbox. Note that
+the first two levels (left and right cortex) are not used.
 }
 
 \keyword{internal}

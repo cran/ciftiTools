@@ -13,7 +13,7 @@ infoCIfTI(cifti_fname)
 infocii(cifti_fname)
 }
 \arguments{
-\item{cifti_fname}{File path of CIFTI-format data (ending in ".d*.nii").}
+\item{cifti_fname}{File path to a CIFTI file (ending in ".d*.nii").}
 }
 \value{
 The metadata component of a \code{"xifti"} for the input CIFTI file
@@ -36,24 +36,29 @@ Additional metadata depends on the type of CIFTI file:
 \enumerate{
 \item{"dtseries"}{
 \enumerate{
-\item{time_start}{   Start time}
-\item{time_step}{   The TR}
-\item{time_unit}{   Unit of time}
+\item{time_start:}{   Start time}
+\item{time_step:}{   The TR}
+\item{time_unit:}{   Unit of time}
 }
 }
 \item{"dscalar"}{
 \enumerate{
-\item{names}{   Name of each data column}
+\item{names:}{   Name of each data column}
 }
 }
 \item{"dlabels"}{
 \enumerate{
-\item{names}{(   Names of each data column.)}
-\item{labels}{(   List of \eqn{L x 5} data.frames. Row names are the label names. Column names are Key, Red, Green, Blue, and Alpha. List entry names are the names of each data column.)}
+\item{names:}{(   Names of each data column.)}
+\item{labels:}{(   List of \eqn{L x 5} data.frames. Row names are the label names. Column names are Key, Red, Green, Blue, and Alpha. List entry names are the names of each data column.)}
 }
 }
 }
 }
+\section{Connectome Workbench}{
+
+This function interfaces with the \code{"-nifti-information"} Workbench command.
+}
+
 \section{Label Levels}{
 
 \code{xifti$meta$subcort$labels} is a factor with the following levels:
@@ -83,13 +88,17 @@ Additional metadata depends on the type of CIFTI file:
 }
 
 These correspond to the same structures as given by
-\code{ft_read_cifti} in the \code{cifti-matlab} MATLAB toolbox.
+\code{ft_read_cifti} in the \code{cifti-matlab} MATLAB toolbox. Note that
+the first two levels (left and right cortex) are not used.
 }
 
-\section{Connectome Workbench Requirement}{
-
-This function uses a system wrapper for the 'wb_command' executable. The
-user must first download and install the Connectome Workbench, available
-from https://www.humanconnectome.org/software/get-connectome-workbench .
+\seealso{
+Other functions for reading in CIFTI or GIFTI metric data: 
+\code{\link{as.xifti}()},
+\code{\link{load_parc}()},
+\code{\link{load_surf}()},
+\code{\link{read_cifti}()},
+\code{\link{read_surf}()},
+\code{\link{read_xifti2}()}
 }
-
+\concept{reading}

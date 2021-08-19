@@ -1,3 +1,47 @@
+# 4.3 (August 14, 2021)
+
+* Fix bug in `read_cifti_convert` where surfaces are not included
+* Switch from `ciftiTools.files` back to a function, `ciftiTools.files()`, because the latter doesn't actually work
+* Better handling of bad argument inputs and of the case where `rgl.useNULL()` in `view_xifti_surface`
+
+# 4.2 (August 10, 2021)
+
+* Rename `unmask_vol` to `unmask_subcortex`
+
+# 4.1 (August 7, 2021)
+
+## Changes affecting users
+
+* New interface for reading in data included in the package
+    * `ciftiTools.files` replaces `demo_files()`. This variable is created in the user's environment upon `library(ciftiTools)` with lazy loading
+    * `ciftiTools.files` will only contain the inflated surface. To import the other two surfaces, use `load_surf()`. Removed the `"surf"` option from `ciftiTools.setOption`.
+* Better handling of surfaces
+    * `add_surf` will automatically resample the surfaces if needed
+    * `read_surf` has the argument `resamp_res` to enable resampling upon reading in the surface, similar to `read_xifti`
+* `newdata_xifti` will accept a length-one vector, to create a constant-valued `"xifti"`
+## Notes for developers
+
+* `ciftiTools.data` contains the surfaces and parcellations building blocks, and the HCP 32k medial wall
+
+# 4.0 (August 4, 2021)
+
+## Changes affecting users
+
+* New surfaces! Check out `ciftiTools.setOption("surf", ...)` The default surface is still very inflated, but different.
+* Parcellations are now included in the package! Check out `load_parc`.
+* Add `apply_xifti`
+* Add `move_to_mwall` and `move_from_mwall`
+* Add `idx` argument to `read_xifti` and related functions
+* Add `...` argument to `transform_xifti`
+* Add `write_surf`, an alias for `write_surf_gifti`
+* Export `fix_xifti`, which ensures `xifti$data` entries are matrices
+* Fix legend plot file placement in `view_xifti_surface`
+
+## Notes for developers
+
+* Updated package documentation
+* `make_surf` is now an alias for `read_surf`, instead of the other way around
+
 # 3.1 (June 16, 2021)
 
 ## Changes affecting users
@@ -42,7 +86,7 @@ None
 ## Changes affecting users
 * Search for "wb_path" during `ciftiTools.setOption` call, and never afterward
 * Ignore Workbench warnings, for the most part
-* Remove arguments concering intermediate files in `resample_cifti` and `read_cifti`
+* Remove arguments concerning intermediate files in `resample_cifti` and `read_cifti`
 * Too many changes to document for `view_xifti_surface`!
 * `transform_xifti` improvements
 * Export `remove_xifti`

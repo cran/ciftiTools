@@ -7,7 +7,7 @@
 xml_cifti(cifti_fname)
 }
 \arguments{
-\item{cifti_fname}{File path of CIFTI-format data (ending in ".d*.nii").}
+\item{cifti_fname}{File path to a CIFTI file (ending in ".d*.nii").}
 }
 \value{
 The XML as a list
@@ -16,11 +16,4 @@ The XML as a list
 Wrapper for Connectome Workbench command
 \code{-nifti-information [fname] -print-xml}
 }
-\section{Connectome Workbench Requirement}{
-
-This function uses a system wrapper for the 'wb_command' executable. The
-user must first download and install the Connectome Workbench, available
-from https://www.humanconnectome.org/software/get-connectome-workbench .
-}
-
 \keyword{internal}

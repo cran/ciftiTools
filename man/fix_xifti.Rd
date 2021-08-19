@@ -2,12 +2,12 @@
 % Please edit documentation in R/fix_xifti.R
 \name{fix_xifti}
 \alias{fix_xifti}
-\title{Fix a \code{"xifti"} object}
+\title{Fix a \code{"xifti"}}
 \usage{
 fix_xifti(xifti, verbose = TRUE)
 }
 \arguments{
-\item{xifti}{The xifti}
+\item{xifti}{A \code{"xifti"} object.}
 
 \item{verbose}{Report each adjustment? Default: \code{TRUE}}
 }
@@ -21,4 +21,3 @@ adjustment is reported.
 \details{
 Right now it only coerces the data to numeric matrices.
 }
-\keyword{internal}

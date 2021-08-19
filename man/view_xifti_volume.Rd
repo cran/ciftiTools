@@ -5,7 +5,7 @@
 \alias{view_cifti_volume}
 \alias{viewCIfTI_volume}
 \alias{viewcii_volume}
-\title{View subcortex}
+\title{View subcortical data in a \code{"xifti"}}
 \usage{
 view_xifti_volume(
   xifti,
@@ -56,8 +56,7 @@ viewcii_volume(
 )
 }
 \arguments{
-\item{xifti}{Object of class "xifti".
-See \code{\link{is.xifti}} and \code{\link{make_xifti}}.}
+\item{xifti}{A \code{"xifti"} object.}
 
 \item{structural_img}{The structural MRI image on which to overlay the
 subcortical values. Can be a file name, \code{"MNI"} (default) to use
@@ -84,5 +83,15 @@ plot. Data values beyond this range will be truncated to the min/max. If
 \item{...}{Additional arguments to pass to \code{papayar::papaya} or \code{oro.nifti::overlay}}
 }
 \description{
-Visualize subcortex of a \code{"xifti"} object
+Visualize the subcortical data in a \code{"xifti"} using slices.
 }
+\seealso{
+Other commonly-used functions: 
+\code{\link{is.cifti}()},
+\code{\link{read_cifti}()},
+\code{\link{resample_cifti}()},
+\code{\link{smooth_cifti}()},
+\code{\link{view_xifti_surface}()},
+\code{\link{write_cifti}()}
+}
+\concept{common}

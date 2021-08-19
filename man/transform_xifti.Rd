@@ -19,7 +19,7 @@
 \alias{log.xifti}
 \title{Apply a univariate transformation to a \code{"xifti"} or pair of \code{"xifti"}s.}
 \usage{
-transform_xifti(xifti, FUN, xifti2 = NULL)
+transform_xifti(xifti, FUN, xifti2 = NULL, ...)
 
 \method{+}{xifti}(xifti, xifti2)
 
@@ -61,6 +61,8 @@ or \code{pmax}.}
 
 \item{xifti2}{The second xifti, if applicable. Otherwise, \code{NULL} (default)}
 
+\item{...}{Additional arguments to \code{FUN}}
+
 \item{x}{The \code{"xifti"}}
 
 \item{digits}{The number of digits to round by}
@@ -68,17 +70,29 @@ or \code{pmax}.}
 \item{base}{The log base}
 }
 \value{
-A \code{xifti} storing the result of applying \code{FUN} to the input(s).
+A \code{"xifti"} storing the result of applying \code{FUN} to the input(s).
 The data dimensions will be the same. The metadata of \code{xifti} will be retained,
 and the metadata of \code{xifti2} will be discarded (if provided).
 }
 \description{
 Apply a univariate transformation to each value in a \code{"xifti"} or pair of
-\code{"xifti"}s. If a pair, they must share the same brainstructures and
-data dimensions.
+\code{"xifti"}s. If a pair, they must share the same dimensions (brainstructures)
+and number of measurements.
 }
 \details{
 If the \code{"xifti"} had the dlabel intent, and the transformation creates
 any value that is not a label value (e.g. a non-integer), then it is converted
 to a dscalar.
 }
+\seealso{
+Other functions for manipulating `xifti` objects: 
+\code{\link{add_surf}()},
+\code{\link{apply_xifti}()},
+\code{\link{combine_xifti}()},
+\code{\link{convert_to_dlabel}()},
+\code{\link{merge_xifti}()},
+\code{\link{newdata_xifti}()},
+\code{\link{remove_xifti}()},
+\code{\link{select_xifti}()}
+}
+\concept{manipulating}

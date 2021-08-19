@@ -7,7 +7,7 @@ check_wb <- function() {
 test_that("Reading CIFTI and GIFTI files is working", {
   check_wb()
 
-  fnames <- ciftiTools:::demo_files()
+  fnames <- ciftiTools.files()
 
   for (cii_fname in fnames$cifti) {
     cat("\n\n"); cat(cii_fname); cat("\n\n")
@@ -21,6 +21,10 @@ test_that("Reading CIFTI and GIFTI files is working", {
     cii2 <- ciftiTools:::read_cifti_separate(cii_fname, brainstructures=cii_info$cifti$brainstructures[1])
     ciftiTools:::expect_equal_xifti(cii, cii2)
 
+    cii <- readcii(cii_fname, brainstructures=cii_info$cifti$brainstructures[1], idx=1)
+    cii2 <- ciftiTools:::read_cifti_separate(cii_fname, brainstructures=cii_info$cifti$brainstructures[1], idx=1)
+    ciftiTools:::expect_equal_xifti(cii, cii2)
+
     # Basic properties
     summary(cii)
     dim(cii)
@@ -28,19 +32,21 @@ test_that("Reading CIFTI and GIFTI files is working", {
     # Test other alias
     cii <- read_cifti(cii_fname, brainstructures=cii_info$cifti$brainstructures)
 
-    if (cii_fname == "dtseries") {
-      # Reading surfaces (only test 32k dtseries)
-      cii <- add_surf(fnames$cifti["dtseries"], surfL=fnames$surf["left"], surfR=fnames$surf["right"])
-      cii <- readcii(fnames$cifti["dtseries"], brainstructures=cii_info$cifti$brainstructures, 
-        surfL_fname=fnames$surf["left"], surfR_fname=fnames$surf["right"], verbose=FALSE
-      )
+    # Reading surfaces
+    if (!grepl("ones", cii_fname)) {
+      cii <- add_surf(cii, surfL=fnames$surf["left"], surfR="midthickness")
       testthat::expect_error(
         readcii(
-          fnames$cifti["dtseries"], brainstructures=cii_info$cifti$brainstructures, 
+          cii_fname, brainstructures=cii_info$cifti$brainstructures,
           surfL_fname=fnames$surf["right"], surfR_fname=fnames$surf["left"]
         )
       )
     }
   }
 
+  load_parc()
+  load_parc("Schaefer_400")
+  testthat::expect_error(load_parc("NotAValidParc"))
+  stopifnot(is.surf(load_surf()))
+  stopifnot(is.surf(load_surf("right", "midthickness")))
 })

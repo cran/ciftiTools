@@ -1,4 +1,4 @@
-#' Write CIFTI cortex data to GIFTI
+#' Write a data matrix to a GIFTI metric file
 #' 
 #' Write the data for the left or right cortex to a metric GIFTI file.
 #'
@@ -41,6 +41,7 @@
 #' @return Whether the GIFTI was successfully written
 #'
 #' @importFrom gifti writegii
+#' @family writing
 #' @export
 write_metric_gifti <- function(
   x, gifti_fname, hemisphere=c("left", "right"),
@@ -147,7 +148,7 @@ write_metric_gifti <- function(
   writegii(x, gifti_fname, use_parsed_transformations=TRUE)
 }
 
-#' Write CIFTI surface data to GIFTI
+#' Write a \code{"surf"} to a GIFTI surface file
 #' 
 #' Write the data for the left or right surface to a surface GIFTI file.
 #'
@@ -167,6 +168,8 @@ write_metric_gifti <- function(
 #' @return Whether the GIFTI was successfully written
 #'
 #' @importFrom gifti writegii
+#' @family writing
+#' @family surfing
 #' @export
 write_surf_gifti <- function(
   x, gifti_fname, hemisphere=c("left", "right"),
@@ -205,4 +208,13 @@ write_surf_gifti <- function(
   }
 
   writegii(x, gifti_fname, use_parsed_transformations=TRUE)
+}
+
+#' @rdname write_surf_gifti
+#' @export
+write_surf <- function(
+  x, gifti_fname, hemisphere=c("left", "right"),
+  encoding=NULL, endian=c("LittleEndian", "BigEndian")){
+
+  write_surf_gifti(x, gifti_fname, hemisphere, encoding, endian)
 }

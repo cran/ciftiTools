@@ -13,6 +13,7 @@
 #' 
 #' @return Logical vector the same length as \code{parc} indicating if the
 #'  vertex lies on a border.
+#' 
 #' @export
 parc_borders <- function(parc, surf=NULL, hemisphere=c("left", "right")) {
   stopifnot(is.vector(parc))
@@ -20,7 +21,7 @@ parc_borders <- function(parc, surf=NULL, hemisphere=c("left", "right")) {
 
   if (is.null(surf)) {
     hemisphere <- match.arg(hemisphere, c("left", "right"))
-    surf <- make_surf(demo_files()$surf[hemisphere])
+    surf <- load_surf(hemisphere)
     if (nrow(surf$vertices) != length(parc)) {
       surf <- resample_surf(surf, length(parc))
       if (nrow(surf$vertices) != length(parc)) {

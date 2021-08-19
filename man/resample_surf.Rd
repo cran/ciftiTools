@@ -7,7 +7,7 @@
 resample_surf(surf, resamp_res, hemisphere = c("left", "right"))
 }
 \arguments{
-\item{surf}{A \code{"surf"} object}
+\item{surf}{A \code{"surf"}}
 
 \item{resamp_res}{The desired resolution}
 
@@ -16,9 +16,23 @@ resample_surf(surf, resamp_res, hemisphere = c("left", "right"))
 hemisphere indicated in the intermediate written GIFTI.}
 }
 \value{
-The new surface
+The new \code{"surf"}
 }
 \description{
-Resample a \code{"surf"} object by writing it to a GIFTI, using the Connectome
+Resample a \code{"surf"} by writing it to a GIFTI, using the Connectome
 Workbench to resample it, and then reading the new file.
 }
+\section{Connectome Workbench}{
+
+This function interfaces with the \code{"-surface-resample"} Workbench command.
+}
+
+\seealso{
+Other functions for working with GIFTI surface geometry data: 
+\code{\link{is.surf}()},
+\code{\link{read_surf}()},
+\code{\link{rotate_surf}()},
+\code{\link{view_surf}()},
+\code{\link{write_surf_gifti}()}
+}
+\concept{surfing}

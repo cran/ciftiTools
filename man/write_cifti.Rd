@@ -5,7 +5,7 @@
 \alias{writeCIfTI}
 \alias{writecii}
 \alias{write_xifti}
-\title{Write a CIFTI file from a \code{"xifti"} object.}
+\title{Write a CIFTI file from a \code{"xifti"} object}
 \usage{
 write_cifti(
   xifti,
@@ -40,10 +40,9 @@ write_xifti(
 )
 }
 \arguments{
-\item{xifti}{Object of class "xifti".
-See \code{\link{is.xifti}} and \code{\link{make_xifti}}.}
+\item{xifti}{A \code{"xifti"} object.}
 
-\item{cifti_fname}{File path of CIFTI-format data (ending in ".d*.nii").}
+\item{cifti_fname}{File path to a CIFTI file (ending in ".d*.nii").}
 
 \item{surfL_fname, surfR_fname}{If the [left/right] surface is present, it
 will be a written to a GIFTI file at this file path. If \code{NULL}
@@ -58,10 +57,27 @@ Named character vector of the written files
 Write out a \code{"xifti"} object as a CIFTI file and (optionally) GIFTI
 surface files.
 }
-\section{Connectome Workbench Requirement}{
+\section{Connectome Workbench}{
 
-This function uses a system wrapper for the 'wb_command' executable. The
-user must first download and install the Connectome Workbench, available
-from https://www.humanconnectome.org/software/get-connectome-workbench .
+This function interfaces with the \code{"-cifti-create-dense-timeseries"},
+\code{"-cifti-create-dense-scalar"}, or \code{"-cifti-create-label"} Workbench
+Command, depending on the input.
 }
 
+\seealso{
+Other commonly-used functions: 
+\code{\link{is.cifti}()},
+\code{\link{read_cifti}()},
+\code{\link{resample_cifti}()},
+\code{\link{smooth_cifti}()},
+\code{\link{view_xifti_surface}()},
+\code{\link{view_xifti_volume}()}
+
+Other functions for writing CIFTI or GIFTI metric data: 
+\code{\link{separate_cifti}()},
+\code{\link{write_metric_gifti}()},
+\code{\link{write_subcort_nifti}()},
+\code{\link{write_surf_gifti}()}
+}
+\concept{common}
+\concept{writing}

@@ -1,6 +1,6 @@
-#' Read gifti file(s) as a \code{xifti} object
+#' Read in GIFTI files as a \code{"xifti"} object
 #' 
-#' Read in gifti metric files as a \code{xifti} object. May also include
+#' Read in gifti metric files as a \code{"xifti"} object. May also include
 #'  surface geometry gifti files and perform resampling. 
 #' 
 #' @param cortexL,cortexL_mwall Left cortex data and ROI. Each must be a path to 
@@ -67,6 +67,7 @@
 #' 
 #' @return The \code{"xifti"} object containing all the data in the input giftis.
 #' 
+#' @family reading
 #' @export
 #' 
 read_xifti2 <- function(
@@ -94,7 +95,10 @@ read_xifti2 <- function(
     if (!is.null(cortexL)) {
       x <- resample_gifti(
         cortexL, 
-        paste0("resamp", cifti_component_suffix("cortexL")),
+        paste0(
+          "resamp", 
+          cifti_component_suffix("cortexL", ifelse(grepl("label\\.gii$", cortexL), "label", "func"))
+        ),
         hemisphere="left", resamp_res=resamp_res, 
         ROIcortex_original_fname=cortexL_mwall, 
         read_dir=read_dir, write_dir=tdir
@@ -106,7 +110,10 @@ read_xifti2 <- function(
     if (!is.null(cortexR)) {
       x <- resample_gifti(
         cortexR, 
-        paste0("resamp", cifti_component_suffix("cortexR")),
+        paste0(
+          "resamp", 
+          cifti_component_suffix("cortexR", ifelse(grepl("label\\.gii$", cortexR), "label", "func"))
+        ),
         hemisphere="right", resamp_res=resamp_res, 
         ROIcortex_original_fname=cortexR_mwall, 
         read_dir=read_dir, write_dir=tdir
@@ -117,9 +124,8 @@ read_xifti2 <- function(
     ## Left surface.
     if (!is.null(surfL)) {
       surfL <- resample_gifti(
-        surfL, 
-        paste0("surf_resamp", cifti_component_suffix("cortexL")),
-        hemisphere="left", file_type="surf", resamp_res=resamp_res,
+        surfL, paste0("resamp", cifti_component_suffix("cortexL", "surf")),
+        hemisphere="left", file_type="surface", resamp_res=resamp_res,
         read_dir=read_dir, write_dir=tdir
       )
     }
@@ -127,9 +133,8 @@ read_xifti2 <- function(
     ## Right surface.
     if (!is.null(surfR)) {
       surfR <- resample_gifti(
-        surfR, 
-        paste0("surf_resamp", cifti_component_suffix("cortexR")),
-        hemisphere="left", file_type="surf", resamp_res=resamp_res,
+        surfR, paste0("resamp", cifti_component_suffix("cortexR", "surf")),
+        hemisphere="right", file_type="surface", resamp_res=resamp_res,
         read_dir=read_dir, write_dir=tdir
       )
     }

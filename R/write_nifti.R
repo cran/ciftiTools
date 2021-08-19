@@ -32,7 +32,13 @@
 #'  \code{"subcortLabs"}, and \code{"ROIsubcortVol"} file names (if written)
 #' 
 #' @importFrom RNifti writeNifti sform<-
+#' @family writing
 #' @export
+#' 
+#' @section Connectome Workbench:
+#' This function interfaces with the \code{"-volume-label-import"} Workbench
+#'  Command.
+#' 
 write_subcort_nifti <- function(
   subcortVol, subcortLabs, subcortMask, trans_mat=NULL,
   subcortVol_fname, subcortLabs_fname, ROIsubcortVol_fname=NULL,
@@ -44,7 +50,7 @@ write_subcort_nifti <- function(
   }
 
   # Data.
-  subcortVol <- unmask_vol(subcortVol, subcortMask, fill=fill)
+  subcortVol <- unmask_subcortex(subcortVol, subcortMask, fill=fill)
   ## https://github.com/jonclayden/RNifti/issues/5
   if (!is.null(trans_mat)) { 
     subcortVol <- RNifti::`sform<-`(subcortVol, trans_mat) 
@@ -54,7 +60,7 @@ write_subcort_nifti <- function(
   # Labels...
   stopifnot(is.subcort_labs(subcortLabs))
   subcortLabs <- as.numeric(subcortLabs) #- 2
-  subcortLabs <- unmask_vol(subcortLabs, subcortMask, fill=fill)
+  subcortLabs <- unmask_subcortex(subcortLabs, subcortMask, fill=fill)
   if (!is.null(trans_mat)) { 
     subcortLabs <- RNifti::`sform<-`(subcortLabs, trans_mat) 
   }

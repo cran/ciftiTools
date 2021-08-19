@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{ciftiTools_msg}
 \alias{ciftiTools_msg}
-\title{Print Suppressable Message}
+\title{Print suppressible message}
 \usage{
 ciftiTools_msg(msg)
 }

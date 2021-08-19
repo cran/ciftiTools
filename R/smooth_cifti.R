@@ -1,7 +1,6 @@
-#' Smooth a CIFTI 
+#' Smooth CIFTI data
 #'
-#' Smooth CIFTI data. This uses the \code{-cifti-smoothing} command 
-#'  from Connectome Workbench.
+#' Spatially smooth the metric data of a CIFTI file or \code{"xifti"} object.
 #' 
 #' If the CIFTI is a ".dlabel" file (intent 3007), then it will be converted
 #'  to a ".dscalar" file because the values will no longer be integer indices.
@@ -10,10 +9,8 @@
 #' 
 #'  Can accept a \code{"xifti"} object as well as a path to a CIFTI-file.
 #' 
-#'  Surfaces are required for each hemisphere in the CIFTI. If they are not provided,
-#'  the inflated surfaces included in \code{"ciftiTools"} will be used.
-#' 
-#' @inheritSection Connectome_Workbench_Description Connectome Workbench Requirement
+#'  Surfaces are required for each hemisphere in the CIFTI. If they are not 
+#'  provided, the default inflated surfaces will be used. 
 #' 
 #' @param x The CIFTI file name or \code{"xifti"} object to smooth.
 #' @param cifti_target_fname File name for the smoothed CIFTI. If
@@ -24,7 +21,7 @@
 #'  for the gaussian surface or volume smoothing kernel, in mm. Default: \code{5}
 #' @param surfL_fname,surfR_fname (Required if the corresponding cortex is 
 #'  present) Surface GIFTI files for the left and right cortical surfaces. If not
-#'  provided, the default very inflated surfaces will be used.
+#'  provided, the default surfaces will be used.
 #' @param cerebellum_fname (Optional) Surface GIFTI file for the cerebellar surface
 #' @param subcortical_zeroes_as_NA,cortical_zeroes_as_NA Should zero-values in 
 #'  the subcortical volume or cortex be treated as NA? Default: \code{FALSE}.
@@ -33,8 +30,12 @@
 #'
 #' @return The \code{cifti_target_fname}, invisibly
 #' 
+#' @family common
 #' @export
 #'
+#' @section Connectome Workbench:
+#' This function interfaces with the \code{"-cifti-smoothing"} Workbench command.
+#' 
 smooth_cifti <- function(
   x, cifti_target_fname=NULL,
   surf_FWHM=5, vol_FWHM=5,
@@ -162,7 +163,7 @@ smooth_cifti <- function(
 
     surfL_fname <- file.path(tempdir(), "left.surf.gii")
     surfL_fname <- resample_gifti(
-      demo_files()$surf["left"], 
+      ciftiTools.files()$surf["left"], 
       surfL_fname, hemisphere="left", file_type="surface", resamp_res=x_res
     )
   }
@@ -202,7 +203,7 @@ smooth_cifti <- function(
 
     surfR_fname <- file.path(tempdir(), "right.surf.gii")
     surfR_fname <- resample_gifti(
-      demo_files()$surf["right"], 
+      ciftiTools.files()$surf["right"], 
       surfR_fname, hemisphere="right", file_type="surface", resamp_res=x_res
     )
   }
