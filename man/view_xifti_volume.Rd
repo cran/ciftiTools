@@ -15,10 +15,12 @@ view_xifti_volume(
   colors = NULL,
   structural_img_colors = gray(0:255/280),
   title = NULL,
-  idx = 1,
+  idx = NULL,
   plane = c("axial", "sagittal", "coronal"),
   n_slices = 9,
   slices = NULL,
+  together = NULL,
+  together_title = NULL,
   widget = FALSE,
   fname = FALSE,
   fname_suffix = c("names", "idx"),
@@ -46,19 +48,24 @@ view_cifti_volume(
   colors = NULL,
   structural_img_colors = gray(0:255/280),
   title = NULL,
-  idx = 1,
+  idx = NULL,
   plane = c("axial", "sagittal", "coronal"),
   n_slices = 9,
   slices = NULL,
+  together = NULL,
+  together_title = NULL,
   widget = FALSE,
   fname = FALSE,
   fname_suffix = c("names", "idx"),
+  fname_sub = FALSE,
   legend_fname = "[fname]_legend",
   legend_ncol = NULL,
   legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
   cex.title = NULL,
+  ypos.title = 0,
+  xpos.title = 0,
   text_color = "white",
   bg = NULL,
   width = NULL,
@@ -74,19 +81,24 @@ viewCIfTI_volume(
   colors = NULL,
   structural_img_colors = gray(0:255/280),
   title = NULL,
-  idx = 1,
+  idx = NULL,
   plane = c("axial", "sagittal", "coronal"),
   n_slices = 9,
   slices = NULL,
+  together = NULL,
+  together_title = NULL,
   widget = FALSE,
   fname = FALSE,
   fname_suffix = c("names", "idx"),
+  fname_sub = FALSE,
   legend_fname = "[fname]_legend",
   legend_ncol = NULL,
   legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
   cex.title = NULL,
+  ypos.title = 0,
+  xpos.title = 0,
   text_color = "white",
   bg = NULL,
   width = NULL,
@@ -102,19 +114,24 @@ viewcii_volume(
   colors = NULL,
   structural_img_colors = gray(0:255/280),
   title = NULL,
-  idx = 1,
+  idx = NULL,
   plane = c("axial", "sagittal", "coronal"),
   n_slices = 9,
   slices = NULL,
+  together = NULL,
+  together_title = NULL,
   widget = FALSE,
   fname = FALSE,
   fname_suffix = c("names", "idx"),
+  fname_sub = FALSE,
   legend_fname = "[fname]_legend",
   legend_ncol = NULL,
   legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
   cex.title = NULL,
+  ypos.title = 0,
+  xpos.title = 0,
   text_color = "white",
   bg = NULL,
   width = NULL,
@@ -196,6 +213,25 @@ subcortex as possible. Ignored if \code{widget}.}
 override \code{n_slices}. Should be a numeric vector with integer values
 between one and the number of slices in \code{plane}. Ignored if \code{widget}.}
 
+\item{together}{Only applies if saving image files (\code{!isFALSE(fname)}).
+Use this argument to create and save a composite image which combines
+multiple plots. \code{NULL} (default) will not combine any plots. Otherwise,
+this argument should be a character vector with one or more of the
+following entries:
+
+\code{"leg"} to combine the color legend with each \code{"xifti"} data plot.
+Overrides/ignores \code{legend_embed}.
+
+\code{"idx"} to place all the plots for the different \code{"idx"} in a grid.
+If the data is not qualitative, a shared color bar will be added to the bottom
+of the composite. If the data is qualitative, a shared color legend will be
+added to the bottom only if \code{"leg"} is in \code{together}.
+For greater control see \code{view_comp} or \code{grid::arrangeGrob}.}
+
+\item{together_title}{If a composite image is made based on \code{together},
+use this argument to add a grand title to the composite image. Should be
+a length-one character vector or \code{NULL} (default) to not add a grand title.}
+
 \item{widget}{Create an interactive widget using \code{papayar}? Otherwise
 display static 2D slices. Default: \code{FALSE}.
 
@@ -256,7 +292,7 @@ appears too high in the plot. Use these arguments to nudge the title up
 or down (\code{ypos.title}) or left or right (\code{xpos.title}).}
 
 \item{text_color}{Color for text in title and colorbar legend. Default:
-\code{"white"}.}
+\code{"white"}. If \code{"white"}, will use black instead for the color}
 
 \item{bg}{Background color. \code{NULL} will use \code{"black"}. Does not affect
 the color legend or color bar if printed separately: those will always have
@@ -276,6 +312,11 @@ should not be provided since they are pre-determined inside this function
 or by the arguments listed above:
 \code{x}, \code{y}, \code{plane}, \code{col.y}, \code{col.x}, \code{zlim.y},
 \code{oma}, \code{plot.type}, \code{bg}.}
+}
+\value{
+If a png or pdf file(s) were written, the names of the files for
+each index (and color legend if applicable) will be returned. Otherwise,
+\code{NULL} is invisibly returned.
 }
 \description{
 Visualize the subcortical data in a \code{"xifti"} using a series of 2D

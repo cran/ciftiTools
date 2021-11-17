@@ -11,7 +11,7 @@ smooth_cifti(
   x,
   cifti_target_fname = NULL,
   surf_FWHM = 5,
-  vol_FWHM = 5,
+  vol_FWHM = 3,
   surfL_fname = NULL,
   surfR_fname = NULL,
   cerebellum_fname = NULL,
@@ -68,7 +68,8 @@ directory if \code{x} was a CIFTI file, and in a temporary directory if
 \code{x} was a \code{"xifti"} object.}
 
 \item{surf_FWHM, vol_FWHM}{The full width at half maximum (FWHM) parameter
-for the gaussian surface or volume smoothing kernel, in mm. Default: \code{5}}
+for the gaussian surface or volume smoothing kernel, in mm. Default: \code{5}
+for cortex (surface) and \code{3} for subcortex (volume).}
 
 \item{surfL_fname, surfR_fname}{(Required if the corresponding cortex is
 present) Surface GIFTI files for the left and right cortical surfaces. If not
@@ -98,6 +99,8 @@ Can accept a \code{"xifti"} object as well as a path to a CIFTI-file.
 
 Surfaces are required for each hemisphere in the CIFTI. If they are not
 provided, the default inflated surfaces will be used.
+
+Conversion for sigma: \eqn{\sigma * 2 * sqrt(2*log(2)) = FWHM}
 }
 \section{Connectome Workbench}{
 

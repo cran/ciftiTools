@@ -16,6 +16,8 @@ view_xifti_surface(
   colors = NULL,
   idx = NULL,
   hemisphere = NULL,
+  together = NULL,
+  together_title = NULL,
   view = c("both", "lateral", "medial"),
   widget = NULL,
   title = NULL,
@@ -49,13 +51,17 @@ view_cifti_surface(
   colors = NULL,
   idx = NULL,
   hemisphere = NULL,
+  together = NULL,
+  together_title = NULL,
   view = c("both", "lateral", "medial"),
   widget = NULL,
   title = NULL,
   slider_title = "Index",
   fname = FALSE,
   fname_suffix = c("names", "idx"),
+  legend_fname = "[fname]_legend",
   legend_ncol = NULL,
+  legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
   cex.title = NULL,
@@ -80,13 +86,17 @@ viewCIfTI_surface(
   colors = NULL,
   idx = NULL,
   hemisphere = NULL,
+  together = NULL,
+  together_title = NULL,
   view = c("both", "lateral", "medial"),
   widget = NULL,
   title = NULL,
   slider_title = "Index",
   fname = FALSE,
   fname_suffix = c("names", "idx"),
+  legend_fname = "[fname]_legend",
   legend_ncol = NULL,
+  legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
   cex.title = NULL,
@@ -111,13 +121,17 @@ viewcii_surface(
   colors = NULL,
   idx = NULL,
   hemisphere = NULL,
+  together = NULL,
+  together_title = NULL,
   view = c("both", "lateral", "medial"),
   widget = NULL,
   title = NULL,
   slider_title = "Index",
   fname = FALSE,
   fname_suffix = c("names", "idx"),
+  legend_fname = "[fname]_legend",
   legend_ncol = NULL,
+  legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
   cex.title = NULL,
@@ -187,6 +201,25 @@ cortex with data (i.e. if \code{xifti$data$cortex_left} and/or
 \code{xifti$data$cortex_right} exist).
 
 Surfaces without data will be colored white.}
+
+\item{together}{Only applies if saving image files (\code{!isFALSE(fname)}).
+Use this argument to create and save a composite image which combines
+multiple plots. \code{NULL} (default) will not combine any plots. Otherwise,
+this argument should be a character vector with one or more of the
+following entries:
+
+\code{"leg"} to combine the color legend with each \code{"xifti"} data plot.
+Overrides/ignores \code{legend_embed}.
+
+\code{"idx"} to place all the plots for the different \code{"idx"} in a grid.
+If the data is not qualitative, a shared color bar will be added to the bottom
+of the composite. If the data is qualitative, a shared color legend will be
+added to the bottom only if \code{"leg"} is in \code{together}.
+For greater control see \code{view_comp} or \code{grid::arrangeGrob}.}
+
+\item{together_title}{If a composite image is made based on \code{together},
+use this argument to add a grand title to the composite image. Should be
+a length-one character vector or \code{NULL} (default) to not add a grand title.}
 
 \item{view}{Which view to display: \code{"lateral"}, \code{"medial"}, or
 \code{"both"}. If \code{NULL} (default), both views will be shown. Each view
@@ -265,8 +298,9 @@ It will be positioned in the bottom-left corner, in a separate subplot
 with 1/4 the height of the brain cortex subplots. Default: \code{TRUE}.
 If \code{FALSE}, print/save it separately instead.
 
-Only applies if the color bar is used (sequential or diverging data).
-The color legend (qualitative data) cannot be embedded at the moment.}
+Only applies if the color bar is used (sequential or diverging data)
+or if \code{"leg" \%in\% together}. Otherwise the color legend
+(qualitative data) cannot be embedded at the moment.}
 
 \item{digits}{The number of digits for the colorbar legend ticks.
 If \code{NULL} (default), let \code{\link{format}} decide.}
@@ -310,7 +344,14 @@ a brain hemisphere subplot dimensions ratio of 10 x 7. Specifying only one
 will set the other to maintain this aspect ratio. Both can be specified to
 set the dimensions exactly, but note that the dimensions cannot be larger
 than the screen resolution. (These arguments do not affect the size of the
-legend, which cannot be controlled.)}
+legend, which cannot be controlled.)
+
+The plot will be taller than \code{height} to accommodate a title or color
+bar.
+
+If multiple \code{idx} are being composited with \code{together}, these
+arguments refer to a single \code{idx} within the composited plot, and not
+the composited plot itself.}
 
 \item{height}{The dimensions of the RGL window, in pixels. If both are
 \code{NULL} (default), these dimensions depend on type of output (Open GL
@@ -321,7 +362,14 @@ a brain hemisphere subplot dimensions ratio of 10 x 7. Specifying only one
 will set the other to maintain this aspect ratio. Both can be specified to
 set the dimensions exactly, but note that the dimensions cannot be larger
 than the screen resolution. (These arguments do not affect the size of the
-legend, which cannot be controlled.)}
+legend, which cannot be controlled.)
+
+The plot will be taller than \code{height} to accommodate a title or color
+bar.
+
+If multiple \code{idx} are being composited with \code{together}, these
+arguments refer to a single \code{idx} within the composited plot, and not
+the composited plot itself.}
 
 \item{zoom}{Adjust the sizes of the brain meshes. Default: \code{NULL} (will
 be set to 0.6 or 160\\% for the Open GL window, and 0.67 or 167\\% for the
@@ -329,10 +377,10 @@ widget.)}
 }
 \value{
 If a png or html file(s) were written, the names of the files for
-each index will be returned. Otherwise, the widget itself is returned
-if a widget was used, and the rgl object IDs are returned if an Open GL
-window was used. The rgl object IDs are useful for further programmatic
-manipulation of the Open GL window.
+each index (and color legend if applicable) will be returned. Otherwise,
+the widget itself is returned if a widget was used, and the rgl object IDs
+are returned if an Open GL window was used. The rgl object IDs are useful
+for further programmatic manipulation of the Open GL window.
 }
 \description{
 Visualize \code{"xifti"} cortical data using an interactive Open GL window

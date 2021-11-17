@@ -12,6 +12,8 @@
 #'  Surfaces are required for each hemisphere in the CIFTI. If they are not 
 #'  provided, the default inflated surfaces will be used. 
 #' 
+#'  Conversion for sigma: \eqn{\sigma * 2 * sqrt(2*log(2)) = FWHM}
+#' 
 #' @param x The CIFTI file name or \code{"xifti"} object to smooth.
 #' @param cifti_target_fname File name for the smoothed CIFTI. If
 #'  \code{NULL}, will be written to "smoothed.d*.nii" in the current working
@@ -19,6 +21,7 @@
 #'  \code{x} was a \code{"xifti"} object.
 #' @param surf_FWHM,vol_FWHM The full width at half maximum (FWHM) parameter
 #'  for the gaussian surface or volume smoothing kernel, in mm. Default: \code{5}
+#'  for cortex (surface) and \code{3} for subcortex (volume).
 #' @param surfL_fname,surfR_fname (Required if the corresponding cortex is 
 #'  present) Surface GIFTI files for the left and right cortical surfaces. If not
 #'  provided, the default surfaces will be used.
@@ -38,7 +41,7 @@
 #' 
 smooth_cifti <- function(
   x, cifti_target_fname=NULL,
-  surf_FWHM=5, vol_FWHM=5,
+  surf_FWHM=5, vol_FWHM=3,
   surfL_fname=NULL, surfR_fname=NULL, cerebellum_fname=NULL,
   subcortical_zeroes_as_NA=FALSE, cortical_zeroes_as_NA=FALSE,
   subcortical_merged=FALSE){
@@ -85,7 +88,7 @@ smooth_cifti <- function(
     brainstructures <- vector("character")
     if (!is.null(x$data$cortex_left)) { brainstructures <- c(brainstructures, "left") }
     if (!is.null(x$data$cortex_right)) { brainstructures <- c(brainstructures, "right") }
-    if (!is.null(x$data$subcort)) { brainstructures <- c(brainstructures, "subcort") }
+    if (!is.null(x$data$subcort)) { brainstructures <- c(brainstructures, "subcortical") }
   
   } else {
     # Check that the original file is valid.

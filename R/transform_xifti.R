@@ -110,7 +110,17 @@ transform_xifti <- function(xifti, FUN, xifti2=NULL, ...) {
     for (bs in names(xifti$data)) {
       if (!is.null(xifti$data[[bs]])) {
         if (nrow(xifti$data[[bs]]) != nrow(xifti2$data[[bs]])) {
-          stop("The xiftis have different number of vertices/voxels for the ", bs, " brainstructure.")
+          if (grepl("cortex", bs)) {
+            len_mwall1 <- length(xifti$meta$cortex$medial_wall_mask[[gsub("cortex_", "", bs)]])
+            len_mwall2 <- length(xifti2$meta$cortex$medial_wall_mask[[gsub("cortex_", "", bs)]])
+            if (!is.null(len_mwall1) && len_mwall1 == len_mwall2) {
+              stop("The xiftis have the same resolution but different medial wall masks in the ", bs, " brainstructure.")
+            } else {
+              stop("The xiftis have different number of vertices/voxels for the ", bs, " brainstructure.")
+            }
+          } else {
+            stop("The xiftis have different number of vertices/voxels for the ", bs, " brainstructure.")
+          }
         }
         xifti$data[[bs]][] <- try_apply(xifti$data[[bs]], x2=xifti2$data[[bs]], FUN=FUN, ...)
       }
@@ -120,9 +130,9 @@ transform_xifti <- function(xifti, FUN, xifti2=NULL, ...) {
   # Convert from dlabel to dscalar if non-label values were introduced by
   #   the transformation function.
   if (!is.null(xifti$meta$cifti$intent) && xifti$meta$cifti$intent == 3007) {
-    v <- unique(as.matrix(xifti))
-    for (T_ in seq(ncol(v))) {
-      if (!all(v[,T_] %in% xifti$meta$cifti$labels[[T_]]$Key)) {
+    v <- as.matrix(xifti)
+    for (T_ in seq(ncol(xifti))) {
+      if (!all(unique(v[,T_]) %in% xifti$meta$cifti$labels[[T_]]$Key)) {
         warning(
           "New data values outside the label table for column ", T_, 
           " were introduced. Changing the xifti intent from dlabel to dscalar."
@@ -156,6 +166,55 @@ transform_xifti <- function(xifti, FUN, xifti2=NULL, ...) {
 #' @export
 `*.xifti` <- function(xifti,xifti2) {
   transform_xifti(xifti, xifti2, FUN=`*`)
+}
+
+#' @rdname transform_xifti
+#' 
+#' @export
+`^.xifti` <- function(xifti,xifti2) {
+  transform_xifti(xifti, xifti2, FUN=`^`)
+}
+
+#' @rdname transform_xifti
+#' 
+#' @export
+`>.xifti` <- function(xifti,xifti2) {
+  transform_xifti(xifti, xifti2, FUN=`>`)
+}
+
+#' @rdname transform_xifti
+#' 
+#' @export
+`>=.xifti` <- function(xifti,xifti2) {
+  transform_xifti(xifti, xifti2, FUN=`>=`)
+}
+
+#' @rdname transform_xifti
+#' 
+#' @export
+`<.xifti` <- function(xifti,xifti2) {
+  transform_xifti(xifti, xifti2, FUN=`<`)
+}
+
+#' @rdname transform_xifti
+#' 
+#' @export
+`<=.xifti` <- function(xifti,xifti2) {
+  transform_xifti(xifti, xifti2, FUN=`<=`)
+}
+
+#' @rdname transform_xifti
+#' 
+#' @export
+`==.xifti` <- function(xifti,xifti2) {
+  transform_xifti(xifti, xifti2, FUN=`==`)
+}
+
+#' @rdname transform_xifti
+#' 
+#' @export
+`!=.xifti` <- function(xifti,xifti2) {
+  transform_xifti(xifti, xifti2, FUN=`!=`)
 }
 
 #' @rdname transform_xifti

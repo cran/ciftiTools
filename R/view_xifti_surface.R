@@ -232,8 +232,8 @@ view_xifti_surface.color <- function(
     } else {
       signif_digits <- digits
     }
-    DATA_MIN <- round(min(values, na.rm=TRUE), signif_digits)
-    DATA_MAX <- round(max(values, na.rm=TRUE), signif_digits)
+    DATA_MIN <- signif(min(values, na.rm=TRUE), signif_digits)
+    DATA_MAX <- signif(max(values, na.rm=TRUE), signif_digits)
 
     if (is.null(zlim)) {
       if (color_mode=="qualitative") {
@@ -242,8 +242,8 @@ view_xifti_surface.color <- function(
         # This variable `zlim` won't be used.
         zlim <- c(0,1)
       } else {
-        pctile_05 <- round(quantile(values, .05, na.rm=TRUE), signif_digits)
-        pctile_95 <- round(quantile(values, .95, na.rm=TRUE), signif_digits)
+        pctile_05 <- signif(quantile(values, .05, na.rm=TRUE), signif_digits)
+        pctile_95 <- signif(quantile(values, .95, na.rm=TRUE), signif_digits)
         pctile_05_neg <- pctile_05 < 0
         pctile_95_pos <- pctile_95 > 0
 
@@ -287,6 +287,8 @@ view_xifti_surface.color <- function(
             value = labs$Key
           )
         } else {
+          unique_vals <- sort(unique(as.vector(values[!is.na(values)])))
+          values[,] <- as.numeric(factor(values, levels=unique_vals))
           pal_base <- make_color_pal(
             colors=colors, color_mode=color_mode, zlim=nrow(labs)
           )
@@ -333,78 +335,6 @@ view_xifti_surface.color <- function(
   }
 
   list(pal_base=pal_base, pal=pal, color_vals=values, unique_vals=unique_vals)
-}
-
-#' Make the colorbar for \code{view_xifti_surface}
-#' 
-#' See \code{\link{view_xifti_surface}} for details.
-#' 
-#' @param pal_base Base palette
-#' @param pal Full palette
-#' @param color_mode See \code{\link{view_xifti_surface}}
-#' @param text_color Color of text
-#' @param digits See \code{\link{view_xifti_surface}}
-#' 
-#' @return A list of keyword arguments to \code{\link[fields]{image.plot}}
-#' 
-#' @keywords internal
-#' 
-view_xifti_surface.cbar <- function(pal_base, pal, color_mode, text_color, digits) {
-
-  colorbar_breaks <- c(
-    pal_base$value[1],
-    pal$value[1:(length(pal$value)-1)] + diff(pal$value)/2,
-    pal$value[length(pal$value)]
-  )
-  colorbar_breaks <- unique(colorbar_breaks)
-
-  colorbar_labs <- switch(color_mode,
-    sequential=c(
-      pal_base$value[1],
-      pal_base$value[nrow(pal_base)]
-    ),
-    qualitative=seq_len(nrow(pal_base)),
-    diverging=c(
-      pal_base$value[1],
-      pal_base$value[as.integer(ceiling(nrow(pal_base)/2))],
-      pal_base$value[nrow(pal_base)]
-    )
-  )
-
-  if (length(colorbar_breaks) == 1) {
-    colorbar_kwargs <- list(
-      legend.only=TRUE, 
-      zlim=c(1,2), 
-      col=rep(pal$color[1], 2), 
-      breaks=c(0, 1, 2), 
-      axis.args=list(at=1, labels=colorbar_breaks)
-    )
-  } else {
-    colorbar_kwargs <- list(
-      legend.only = TRUE, 
-      zlim = range(pal$value), 
-      col = as.character(pal$color),
-      breaks=colorbar_breaks, 
-      #legend.lab=colorbar_label,
-      axis.args=list(
-        cex.axis=1.7, at=colorbar_labs,
-        col=text_color, col.ticks=text_color, col.axis=text_color,
-        labels=format(colorbar_labs, digits=digits)
-      )
-    )
-  }
-
-  colorbar_kwargs <- c(colorbar_kwargs,
-    list(
-      horizontal=TRUE, # horizontal legend
-      legend.cex=2, # double size of labels (numeric limits)
-      #legend.shrink=.5, # half the width of the legend #override by smallplot
-      #legend.width=1.67, # height of colorbar #override by smallplot
-      legend.line=5, # height of lines between labels and colorbar
-      #legend.mar=4, # legend margin #override by smallplot
-      smallplot=c(.15, .5, .65, 1) # x1 x2 y1 y2
-    )
-  )
 }
 
 #' Draw title in RGL
@@ -556,6 +486,27 @@ view_xifti_surface.draw_mesh <- function(
 #'  \code{xifti$data$cortex_right} exist).
 #' 
 #'  Surfaces without data will be colored white. 
+#' @param together Only applies if saving image files (\code{!isFALSE(fname)}). 
+#'  Use this argument to create and save a composite image which combines
+#'  multiple plots. \code{NULL} (default) will not combine any plots. Otherwise, 
+#'  this argument should be a character vector with one or more of the 
+#'  following entries:
+#'  
+#'  \code{"leg"} to combine the color legend with each \code{"xifti"} data plot.
+#'  Overrides/ignores \code{legend_embed}.
+#' 
+#'  \code{"idx"} to place all the plots for the different \code{"idx"} in a grid.
+#'  If the data is not qualitative, a shared color bar will be added to the bottom
+#'  of the composite. If the data is qualitative, a shared color legend will be
+#'  added to the bottom only if \code{"leg"} is in \code{together}.
+# 
+#  \code{"bs"} (\code{view_xifti} only) to place the cortical and subcortical plots
+#  side-by-side.
+# 
+#'  For greater control see \code{view_comp} or \code{grid::arrangeGrob}.
+#' @param together_title If a composite image is made based on \code{together},
+#'  use this argument to add a grand title to the composite image. Should be
+#'  a length-one character vector or \code{NULL} (default) to not add a grand title.
 #' @inheritParams surface_plot_Params
 #' @param slider_title Text at bottom of plot that will be added if a slider
 #'  is used, to provide a title for it. Default: \code{"Index"}.
@@ -578,8 +529,9 @@ view_xifti_surface.draw_mesh <- function(
 #'  with 1/4 the height of the brain cortex subplots. Default: \code{TRUE}.
 #'  If \code{FALSE}, print/save it separately instead. 
 #' 
-#'  Only applies if the color bar is used (sequential or diverging data).
-#'  The color legend (qualitative data) cannot be embedded at the moment.
+#'  Only applies if the color bar is used (sequential or diverging data)
+#'  or if \code{"leg" \%in\% together}. Otherwise the color legend
+#'  (qualitative data) cannot be embedded at the moment.
 #' @param digits The number of digits for the colorbar legend ticks.
 #'  If \code{NULL} (default), let \code{\link{format}} decide.
 #' @param borders Only applicable if \code{color_mode} is \code{"qualitative"}.
@@ -589,10 +541,10 @@ view_xifti_surface.draw_mesh <- function(
 #'  color to use that instead. If \code{FALSE} or \code{NULL} (default), do
 #'  not draw borders.
 #' @return If a png or html file(s) were written, the names of the files for
-#'  each index will be returned. Otherwise, the widget itself is returned
-#'  if a widget was used, and the rgl object IDs are returned if an Open GL
-#'  window was used. The rgl object IDs are useful for further programmatic 
-#'  manipulation of the Open GL window.
+#'  each index (and color legend if applicable) will be returned. Otherwise, 
+#'  the widget itself is returned if a widget was used, and the rgl object IDs 
+#'  are returned if an Open GL window was used. The rgl object IDs are useful 
+#'  for further programmatic manipulation of the Open GL window.
 #' 
 #' @importFrom grDevices dev.list dev.off png rgb
 #' @importFrom stats quantile
@@ -601,7 +553,9 @@ view_xifti_surface.draw_mesh <- function(
 view_xifti_surface <- function(
   xifti=NULL, surfL=NULL, surfR=NULL, 
   color_mode="auto", zlim=NULL, colors=NULL, 
-  idx=NULL, hemisphere=NULL, view=c("both", "lateral", "medial"), widget=NULL,
+  idx=NULL, hemisphere=NULL, 
+  together=NULL, together_title=NULL,
+  view=c("both", "lateral", "medial"), widget=NULL,
   title=NULL, slider_title="Index", 
   fname=FALSE, fname_suffix=c("names", "idx"), legend_fname="[fname]_legend",
   legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL, digits=NULL,
@@ -695,9 +649,61 @@ view_xifti_surface <- function(
 
   saving_file <- !isFALSE(fname)
 
+  # File saving: `together`
+  if (!is.null(together)) {
+
+    # TO DO: allow display of static composites?
+
+    if (widget) { stop(
+      "Composite images are not compatible with widget. ", 
+      "Set `together=NULL` or `widget=FALSE`."
+    ) }
+
+    if (!saving_file) { stop(
+      "Composite images are not compatible with OpenGL window. ", 
+      "Set `together=NULL` or file path(s) for `fname`."
+    ) }
+
+    # Check packages
+    pkg <- vapply(c("png", "grid", "gridExtra"), requireNamespace, quietly=TRUE, FALSE)
+    if (any(!pkg)) {
+      stop(
+        "These packages need to be installed to use `view_comp`: ", 
+        paste(names(pkg)[!pkg], collapse=", "), call.=FALSE
+      )
+    }
+
+    # check `together`
+    together <- match.arg(together, c("leg", "idx"), several.ok=TRUE)
+    together_leg <- "leg" %in% together
+    together_idx <- "idx" %in% together
+    together <- TRUE
+
+    # check `together_title`
+    if (!is.null(together_title)) {
+      together_title <- as.character(together_title)
+      if (length(together_title) > 1) {
+        warning("Using the first entry of `together_title`.\n")
+        together_title <- together_title[1]
+      }
+    }
+  } else {
+    together <- together_leg <- together_idx <- FALSE
+  }
+
+  # File saving: `fname`
+  comp_fname <- NULL
+  legend_embed2 <- FALSE
   if (saving_file) {
+
+    fname_use_names <- !together_idx && !is.null(xifti$meta$cifti$names)
+
+    # Use default file name(s) if `fname==TRUE`.
     if (isTRUE(fname)) {
-      if (!is.null(xifti$meta$cifti$names)) {
+      if (together_idx) { 
+        fname <- "xifti_surf"
+        comp_fname <- fname
+      } else if (fname_use_names) {
         fname <- gsub(" ", "_", xifti$meta$cifti$names[idx], fixed=TRUE)
         if (length(fname) != length(unique(fname))) {
           warning(
@@ -710,18 +716,12 @@ view_xifti_surface <- function(
       } else {
         fname <- "xifti_surf"
       }
+    } else {
+      fname <- as.character(fname)
     }
 
-    fname <- as.character(fname)
-    if (length(fname) != length(unique(fname))) {
-      warning(
-        "Non-unique file names... proceeding anyway. ",
-        "If this is not intended, set `fname` to the exact unique file ",
-        "name(s) you want to use for each `idx`.\n"
-      )
-    }
-
-    if (any(grepl("\\.html$", fname))) {
+    # `fname` if saving htmlwidget.
+    if (any(grepl("\\.html$", fname)) || rgl::rgl.useNULL()) {
       if (!requireNamespace("htmlwidgets", quietly = TRUE)) {
         stop(
           "Package \"htmlwidgets\" will be needed by `view_xifti_surface` to ",
@@ -732,39 +732,75 @@ view_xifti_surface <- function(
         warning("Using first entry of `fname`, since only one html file is being written.\n")
         fname <- fname[1]
       }
+      if (!grepl("\\.html$", fname)) {
+        fname <- paste0(fname, ".html")[1]
+      }
+
+    # `fname` if saving png.
     } else {
+      # Strip file extension.
       fname <- gsub(".pdf$", "", fname)
       fname <- gsub(".png$", "", fname)
+      # Check length.
       if (!(length(fname) %in% c(1, length(idx)))) {
         warning("Using first entry of `fname` since its length is not 1, or the length of `idx`.\n")
         fname <- fname[1]
       }
-      if (rgl::rgl.useNULL()) {
-        fname <- paste0(fname, ".html")[1]
+      # Save `fname` to use for composite.
+      if (together_idx && is.null(comp_fname)) {
+        comp_fname <- fname
+        if (length(comp_fname) > 1) { 
+          warning("Using the first entry of `fname` (since compositing, there's only one file to save).\n")
+          comp_fname <- comp_fname[1]
+        }
+      }
+      
+      # Modify `fname`
+      if (together) {
+        legend_embed2 <- !isFALSE(legend_embed)
+        legend_embed <- FALSE
+      }
+      if (together_idx) {
+        fname <- paste0(tempfile(as.character(seq(length(idx)))), ".png")
+        comp_fname <- paste0(comp_fname, ".png")
       } else {
+        # Add suffix if multiple `idx`.
         if (length(fname) == 1 && length(idx) > 1) {
-          # Add suffix for png files
           fname_suffix <- match.arg(fname_suffix, c("names", "idx"))
-          if (fname_suffix == "names" && !is.null(xifti$meta$cifti$names)) {
+          if (fname_suffix == "names" && fname_use_names) {
             fname <- paste0(fname, "_", xifti$meta$cifti$names[idx])
           } else {
             fname <- paste0(fname, "_", as.character(idx)) 
           }
         }
+        # Add png file extension.
         fname <- paste0(fname, ".png")
+      }
+
+      # Check that `fname` are unique.
+      if (length(fname) != length(unique(fname))) {
+        warning(
+          "Non-unique file names... proceeding anyway. ",
+          "If this is not intended, set `fname` to the exact unique file ",
+          "name(s) you want to use for each `idx`.\n"
+        )
       }
     }
 
+    # Check that `fname` directories exist.
     fname_dirs <- unique(dirname(fname))
     if (!all(file.exists(fname_dirs))) {
       stop(
-        "These directories do not exist: ", 
+        "These directories for `fname` do not exist: ", 
         paste0(fname_dirs[!dir.exists(fname_dirs)], 
         collapse=" ")
       )
     }
 
-    if (!isFALSE(legend_fname)) {
+    # `legend_fname`
+    if (together_leg) {
+      legend_fname <- paste0(tempfile(), ".png")
+    } else if (!isFALSE(legend_fname)) {
       if (!(length(legend_fname) == 1)) {
         warning("Using first entry of `legend_fname`.\n")
         legend_fname <- legend_fname[1]
@@ -772,11 +808,24 @@ view_xifti_surface <- function(
       if (grepl("\\[fname\\]", legend_fname)) {
         legend_fname <- gsub(
           "\\[fname\\]", 
-          gsub("\\.png|\\.html", "", fname[1]), 
-          legend_fname
+          gsub("\\.png|\\.html", "", ifelse(together_idx, basename(comp_fname), basename(fname[1]))), 
+          basename(legend_fname)
+        )
+        legend_fname <- file.path(
+          ifelse(together_idx, dirname(comp_fname), dirname(fname[1])), legend_fname
         )
       }
       if (!endsWith(legend_fname, ".png")) { legend_fname <- paste0(legend_fname, ".png") }
+    }
+
+    # Check that `legend_fname` directory exists.
+    if (!isFALSE(legend_fname)) {
+      if (!dir.exists(dirname(legend_fname))) {
+        stop(
+          "The directory for `legend_fname` does not exist: ",
+          dirname(legend_fname)
+        )
+      }
     }
   } else {
     legend_fname <- FALSE
@@ -924,7 +973,7 @@ view_xifti_surface <- function(
     if (color_mode == "auto") {
       if (length(zlim) == 3) { 
         color_mode <- "diverging"
-      } else if (is.null(values_vec) || all(values_vec %in% c(NA, NaN))) { 
+      } else if (is.null(values_vec) || all(values_vec %in% c(NA, NaN))) {
         color_mode <- "diverging"
         if (is.null(colors)) { colors <- "ROY_BIG_BL" }
       } else if (length(zlim) == 2) {
@@ -993,15 +1042,16 @@ view_xifti_surface <- function(
 
   use_cleg <- FALSE
   if (any_colors) {
-    # Color legend
+    # Use color legend (except in the weird case).
     if (color_mode == "qualitative") {
-      if (isTRUE(legend_embed)) {
+      if (isTRUE(legend_embed) && !together_leg) {
         warning(
           "`legend_embed` is `TRUE` and `color_mode` is `'qualitative'`. ",
           "However, the color legend for qualitative data cannot be embedded. ",
           "Embedding a color bar that shows the colors in order, instead of the color legend. ",
           "To view the color legend separately (as recommended) set `legend_embed` to `FALSE`.\n"
         )
+        colorbar_kwargs <- view_xifti.cbar(pal_base, pal, color_mode, text_color, digits) # added?
       } else {
         legend_embed <- FALSE; use_cleg <- TRUE
         # Get the labels for the color legend list.
@@ -1015,23 +1065,23 @@ view_xifti_surface <- function(
           cleg_labs <- rownames(xifti$meta$cifti$labels[[idx[1]]])
         }
         cleg_labs <- as.character(cleg_labs)
-        # Skip if there are too many legend labels.
-        if (!requireNamespace("ggpubr", quietly = TRUE)) {
+        cleg <- pal_base
+        cleg$labels <- factor(cleg_labs, levels=unique(cleg_labs))
+        if ((!legend_alllevels) && (is.null(unique_vals))) { 
+          cleg <- cleg[cleg$value %in% as.vector(do.call(cbind, values)),] 
+        }
+        # Skip if there are too many legend labels, or only one label.
+        if (nrow(cleg) < 1) {
           use_cleg <- FALSE
-          warning("Package \"ggpubr\" needed to make the color legend. Please install it. Skipping the color legend for now.\n")
-        } else {
-          cleg <- pal_base
-          cleg$labels <- factor(cleg_labs, levels=unique(cleg_labs))
-          if (!legend_alllevels) { 
-            cleg <- cleg[cleg$value %in% as.vector(do.call(cbind, values)),] 
+        } else if (nrow(cleg) > 200) {
+          use_cleg <- FALSE
+          if (isFALSE(fname) || !isFALSE(legend_fname)) {
+            warning("Too many labels (> 200) for qualitative color legend. Not rendering it.\n")
           }
-          if (nrow(cleg) < 1) {
+        } else {
+          if (!requireNamespace("ggpubr", quietly = TRUE)) {
             use_cleg <- FALSE
-          } else if (nrow(cleg) > 200) {
-            use_cleg <- FALSE
-            if (isFALSE(fname) || !isFALSE(legend_fname)) {
-              warning("Too many labels (> 200) for qualitative color legend. Not rendering it.\n")
-            }
+            warning("Package \"ggpubr\" needed to make the color legend. Please install it. Skipping the color legend for now.\n")
           } else {
             # Get the color legend list dimensions.
             if (is.null(legend_ncol)) {
@@ -1043,19 +1093,27 @@ view_xifti_surface <- function(
         }
       }
       colorbar_kwargs <- NULL
+
+    # Color bar
     } else {
       if (is.null(legend_embed)) { legend_embed <- TRUE }
-      colorbar_kwargs <- view_xifti_surface.cbar(pal_base, pal, color_mode, text_color, digits)
+      if (together_leg) { legend_embed <- FALSE }
+      colorbar_kwargs <- view_xifti.cbar(pal_base, pal, color_mode, text_color, digits)
     }
     
   } else {
     if (isTRUE(legend_embed)) {
-      warning(paste(
+      warning(
         "`legend_embed` is `TRUE`, but there is no data. Setting to `FALSE`.\n"
-      ))
+      )
+    }
+    if (isTRUE(together_leg)) {
+      warning(
+        "`together_leg` is `TRUE`, but there is no data. Setting to `FALSE`.\n"
+      )
     }
     colorbar_kwargs <- NULL
-    legend_embed <- FALSE
+    legend_embed <- together_leg <- FALSE
   }
 
   # ----------------------------------------------------------------------------
@@ -1087,6 +1145,8 @@ view_xifti_surface <- function(
   } else {
     brain_panels_dims <- as.integer(round(c(width, height)))
   }
+
+  together_scale <- brain_panels_dims[1]/300
 
   indiv_panel_width <- brain_panels_dims[1]/brain_panels_ncol
   indiv_panel_height <- brain_panels_dims[2]/brain_panels_nrow
@@ -1261,9 +1321,9 @@ view_xifti_surface <- function(
           if (use_cleg) {
             print(cleg)
             if (!isFALSE(fname)) {
-              cleg_h_per_row <- 1/3 #inches
-              cleg_w_factor <- mean(nchar(cleg_labs)*1/4) + 3
               if (!isFALSE(legend_fname)) {
+                cleg_h_per_row <- 1/3 #inches
+                cleg_w_factor <- mean(nchar(cleg_labs)*1/4) + 3
                 ggplot2::ggsave(
                   filename = legend_fname,
                   height = (2 + colorlegend_nrow) * cleg_h_per_row, # add 2 for title
@@ -1277,10 +1337,19 @@ view_xifti_surface <- function(
             if (!requireNamespace("fields", quietly = TRUE)) {
               stop("Package \"fields\" needed to render the color bar for `view_xifti_surface`. Please install it.", call. = FALSE)
             }
-            if (!isFALSE(legend_fname)) { png(legend_fname) }
-            colorbar_kwargs$smallplot <- c(.15, .85, .45, .6) # x1 x2 y1 y2
+            if (!isFALSE(fname) && !isFALSE(legend_fname)) { 
+              png(
+                legend_fname, bg=bg,
+                width=brain_panels_dims[1], height=ceiling(brain_panels_dims[1]*.4)
+              )
+            }
+            colorbar_kwargs$smallplot <- c(.15, .85, .7, .9) # x1 x2 y1 y2
+            # Make labels smaller (cex.axis) and lower to compensate (mgp)
+            colorbar_kwargs$axis.args$cex.axis <- colorbar_kwargs$axis.args$cex.axis * together_scale * .85
+            colorbar_kwargs$axis.args$mgp <- c(3,.5+together_scale,0)
+
             try(suppressWarnings(do.call(fields::image.plot, colorbar_kwargs)), silent=TRUE)
-            if (!isFALSE(legend_fname)) { if (close_after_save) { dev.off() } }
+            if (!isFALSE(fname) && !isFALSE(legend_fname)) { if (close_after_save) { dev.off() } }
           }
         }
       }
@@ -1305,6 +1374,11 @@ view_xifti_surface <- function(
   }
 
   names(subscenes)[is.na(names(subscenes))] <- "Empty"
+
+  fname_all <- fname
+  if (!isFALSE(legend_fname) && !legend_embed) {
+    if (use_cleg || any_colors){ fname_all <- c(fname, legend_fname) }
+  }
 
   if (widget) {
 
@@ -1340,7 +1414,6 @@ view_xifti_surface <- function(
 
     # [TO DO]: Adjust sizing
     out <- rgl::rglwidget(
-      # For some reason the height you give, isn't exactly the height it uses???
       height=round(all_panels_height/1.1), 
       width=round(all_panels_width/1.1)
     )
@@ -1351,23 +1424,63 @@ view_xifti_surface <- function(
       )
     }
     rgl::rgl.close()
-    
+  }
+
+  # Does this ever happen?
+  if (!file.exists(as.character(legend_fname))) { legend_fname <- NULL }
+  # Compositing `together`
+  if (together_idx) {
+    together_ncol <- ceiling(sqrt(length(idx)))
+    together_nrow <- ceiling(length(idx)/together_ncol)
+    comp_width <- all_panels_width * together_ncol
+    comp_height <- all_panels_height * together_nrow
+    title_height <- .2/together_nrow
+    leg_height <- .3/together_nrow
+    comp_height_mult <- 1
+    if (together_leg || !use_cleg) { comp_height_mult <- comp_height_mult + leg_height }
+    if (!is.null(together_title)) { comp_height_mult <- comp_height_mult + title_height }
+    png(comp_fname, bg=bg, width=comp_width, height=comp_height * comp_height_mult)
+    fname_all <- comp_fname
+    if ((!legend_embed2) || (!together_leg && use_cleg)) {
+      fname_all <- c(fname_all, legend_fname)
+      legend_fname <- NULL
+    }
+    view_comp(
+      fname, ncol=together_ncol, 
+      legend=legend_fname, legend_height=leg_height,
+      title=together_title, title_height=title_height,
+      title_fsize=1.5 * together_scale
+    )
+    dev.off()
+    if (!together_leg && !use_cleg && legend_embed2 && (!is.null(legend_fname))) {
+      file.rename(legend_fname, paste0(tempfile(), ".png"))
+    }
+    if (!together_leg && use_cleg && !legend_embed && (!is.null(legend_fname))) {
+      file.rename(legend_fname, paste0(tempfile(), ".png"))
+    }
+    # comp_fname <- crop_image(comp_fname)
+  } else if (together_leg) {
+    for (ff in seq(length(fname))) {
+      tfile <- tempfile()
+      png(tfile, bg=bg, width=all_panels_width, height=floor(all_panels_height*1.3))
+      view_comp(fname[ff], legend=legend_fname)
+      dev.off()
+      file.rename(tfile, fname[ff])
+    }
+    fname_all <- fname
+  }
+
+
+  # Return values.
+  if (widget) {
     if (saving_file) {
-      if (!requireNamespace("htmlwidgets", quietly = TRUE)) {
-        stop(
-          "Package \"htmlwidgets\" will be needed by `view_xifti_surface` to ",
-          "display a widget. Please install it.\n"
-        )
-      }
       htmlwidgets::saveWidget(out, fname, background=bg, title="ciftiTools surface plot")
       return(invisible(fname))
     } else {
       return(out)
     }
-
   } else if (saving_file) {
-    return(invisible(fname))
-
+    return(invisible(fname_all))
   } else {
     return(invisible(rglIDs))
   }
@@ -1378,9 +1491,12 @@ view_xifti_surface <- function(
 view_cifti_surface <- function(
   xifti=NULL, surfL=NULL, surfR=NULL, 
   color_mode="auto", zlim=NULL, colors=NULL, 
-  idx=NULL, hemisphere=NULL, view=c("both", "lateral", "medial"), widget=NULL,
-  title=NULL, slider_title="Index", fname=FALSE, fname_suffix=c("names", "idx"),
-  legend_ncol=NULL, legend_embed=NULL, digits=NULL,
+  idx=NULL, hemisphere=NULL, 
+  together=NULL, together_title=NULL,
+  view=c("both", "lateral", "medial"), widget=NULL,
+  title=NULL, slider_title="Index", 
+  fname=FALSE, fname_suffix=c("names", "idx"), legend_fname="[fname]_legend",
+  legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL, digits=NULL,
   cex.title=NULL, text_color="black", bg=NULL,
   borders=FALSE, alpha=1.0, edge_color=NULL, vertex_color=NULL, vertex_size=0,
   width=NULL, height=NULL, zoom=NULL){
@@ -1388,9 +1504,12 @@ view_cifti_surface <- function(
   view_xifti_surface(
     xifti=xifti, surfL=surfL, surfR=surfR, 
     color_mode=color_mode, zlim=zlim, colors=colors,
-    idx=idx, hemisphere=hemisphere, view=view, widget=widget,
-    title=title, slider_title=slider_title, fname=fname, fname_suffix=fname_suffix,
-    legend_ncol=legend_ncol, legend_embed=legend_embed, digits=digits,
+    idx=idx, hemisphere=hemisphere, 
+    together=together, together_title=together_title,
+    view=view, widget=widget,
+    title=title, slider_title=slider_title, 
+    fname=fname, fname_suffix=fname_suffix, legend_fname=legend_fname,
+    legend_ncol=legend_ncol, legend_alllevels=legend_alllevels, legend_embed=legend_embed, digits=digits,
     cex.title=cex.title, text_color=text_color, bg=bg,
     borders=borders, alpha=alpha, edge_color=edge_color, vertex_color=vertex_color, vertex_size=vertex_size,
     width=width, height=height, zoom=zoom
@@ -1402,9 +1521,12 @@ view_cifti_surface <- function(
 viewCIfTI_surface <- function(
   xifti=NULL, surfL=NULL, surfR=NULL, 
   color_mode="auto", zlim=NULL, colors=NULL, 
-  idx=NULL, hemisphere=NULL, view=c("both", "lateral", "medial"), widget=NULL,
-  title=NULL, slider_title="Index", fname=FALSE, fname_suffix=c("names", "idx"),
-  legend_ncol=NULL, legend_embed=NULL, digits=NULL,
+  idx=NULL, hemisphere=NULL, 
+  together=NULL, together_title=NULL,
+  view=c("both", "lateral", "medial"), widget=NULL,
+  title=NULL, slider_title="Index", 
+  fname=FALSE, fname_suffix=c("names", "idx"), legend_fname="[fname]_legend",
+  legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL, digits=NULL,
   cex.title=NULL, text_color="black", bg=NULL,
   borders=FALSE, alpha=1.0, edge_color=NULL, vertex_color=NULL, vertex_size=0,
   width=NULL, height=NULL, zoom=NULL){
@@ -1412,9 +1534,12 @@ viewCIfTI_surface <- function(
   view_xifti_surface(
     xifti=xifti, surfL=surfL, surfR=surfR, 
     color_mode=color_mode, zlim=zlim, colors=colors,
-    idx=idx, hemisphere=hemisphere, view=view, widget=widget,
-    title=title, slider_title=slider_title, fname=fname, fname_suffix=fname_suffix,
-    legend_ncol=legend_ncol, legend_embed=legend_embed, digits=digits,
+    idx=idx, hemisphere=hemisphere, 
+    together=together, together_title=together_title,
+    view=view, widget=widget,
+    title=title, slider_title=slider_title, 
+    fname=fname, fname_suffix=fname_suffix, legend_fname=legend_fname,
+    legend_ncol=legend_ncol, legend_alllevels=legend_alllevels, legend_embed=legend_embed, digits=digits,
     cex.title=cex.title, text_color=text_color, bg=bg,
     borders=borders, alpha=alpha, edge_color=edge_color, vertex_color=vertex_color, vertex_size=vertex_size,
     width=width, height=height, zoom=zoom
@@ -1426,9 +1551,12 @@ viewCIfTI_surface <- function(
 viewcii_surface <- function(
   xifti=NULL, surfL=NULL, surfR=NULL, 
   color_mode="auto", zlim=NULL, colors=NULL, 
-  idx=NULL, hemisphere=NULL, view=c("both", "lateral", "medial"), widget=NULL,
-  title=NULL, slider_title="Index", fname=FALSE, fname_suffix=c("names", "idx"),
-  legend_ncol=NULL, legend_embed=NULL, digits=NULL,
+  idx=NULL, hemisphere=NULL, 
+  together=NULL, together_title=NULL,
+  view=c("both", "lateral", "medial"), widget=NULL,
+  title=NULL, slider_title="Index", 
+  fname=FALSE, fname_suffix=c("names", "idx"), legend_fname="[fname]_legend",
+  legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL, digits=NULL,
   cex.title=NULL, text_color="black", bg=NULL,
   borders=FALSE, alpha=1.0, edge_color=NULL, vertex_color=NULL, vertex_size=0,
   width=NULL, height=NULL, zoom=NULL){
@@ -1436,9 +1564,12 @@ viewcii_surface <- function(
   view_xifti_surface(
     xifti=xifti, surfL=surfL, surfR=surfR, 
     color_mode=color_mode, zlim=zlim, colors=colors,
-    idx=idx, hemisphere=hemisphere, view=view, widget=widget,
-    title=title, slider_title=slider_title, fname=fname, fname_suffix=fname_suffix,
-    legend_ncol=legend_ncol, legend_embed=legend_embed, digits=digits,
+    idx=idx, hemisphere=hemisphere, 
+    together=together, together_title=together_title,
+    view=view, widget=widget,
+    title=title, slider_title=slider_title, 
+    fname=fname, fname_suffix=fname_suffix, legend_fname=legend_fname,
+    legend_ncol=legend_ncol, legend_alllevels=legend_alllevels, legend_embed=legend_embed, digits=digits,
     cex.title=cex.title, text_color=text_color, bg=bg,
     borders=borders, alpha=alpha, edge_color=edge_color, vertex_color=vertex_color, vertex_size=vertex_size,
     width=width, height=height, zoom=zoom
