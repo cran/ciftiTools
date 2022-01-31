@@ -340,7 +340,7 @@ as.matrix.xifti <- function(x, ...) {
 #' @param surfL Left surface
 #' @param surfR Right surface
 #' 
-#' @keywords internal
+#' @export
 #' 
 #' @return The inferred resolution
 #' 
@@ -368,6 +368,7 @@ infer_resolution <- function(xifti, surfL=NULL, surfR=NULL) {
       res <- min(nvL, nvR)
       if (is.infinite(res)) { res <- NULL }
     }
+    # [TO DO]: if no medial wall mask exists, but a cortex has data?
   }
 
   res
