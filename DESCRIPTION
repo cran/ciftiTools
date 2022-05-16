@@ -1,7 +1,7 @@
 Package: ciftiTools
 Type: Package
 Title: Tools for Reading, Writing, Viewing and Manipulating CIFTI Files
-Version: 0.8.0
+Version: 0.9.0
 Authors@R: c(
     person(given = "Amanda",
            family = "Mejia",
@@ -34,15 +34,15 @@ License: GPL-3
 Encoding: UTF-8
 Imports: fields, gifti (> 0.7.5), grDevices, oro.nifti, RNifti,
         RColorBrewer, rgl, viridisLite, xml2
-Suggests: covr, ggplot2, ggpubr, grid, gridExtra, htmlwidgets, knitr,
-        rmarkdown, papayar, png, testthat (>= 3.0.0)
+Suggests: covr, ggplot2, ggpubr, grid, gridExtra, htmlwidgets,
+        manipulateWidget, knitr, rmarkdown, png, testthat (>= 3.0.0)
 RoxygenNote: 7.1.2
 URL: https://github.com/mandymejia/ciftiTools
 BugReports: https://github.com/mandymejia/ciftiTools/issues
 NeedsCompilation: no
-Packaged: 2022-01-29 03:27:30 UTC; ddpham
+Packaged: 2022-05-15 16:06:05 UTC; ddpham
 Author: Amanda Mejia [aut, cre],
   Damon Pham [aut] (<https://orcid.org/0000-0001-7563-4727>),
   John Muschelli [ctb] (<https://orcid.org/0000-0001-6469-1750>)
 Repository: CRAN
-Date/Publication: 2022-01-31 07:40:14 UTC
+Date/Publication: 2022-05-16 06:10:02 UTC
