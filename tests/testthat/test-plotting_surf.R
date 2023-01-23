@@ -8,7 +8,7 @@ test_that("plot_xifti_surface and related functions are working", {
 
   check_wb()
 
-  plot2 <- function(...){plot(...); rgl::rgl.close()}
+  plot2 <- function(...){plot(...); rgl::close3d()}
 
   fnames <- ciftiTools.files()
   for (cii_fname in fnames$cifti) {
@@ -22,7 +22,7 @@ test_that("plot_xifti_surface and related functions are working", {
     print("diverging")
     plot2(cii, color_mode="diverging")
     #plot2(cii, color_mode="diverging", zlim=c(2, 5))
-    plot2(cii, color_mode="diverging", zlim=c(5, 2))
+    plot2(cii, color_mode="diverging", zlim=c(5, 2), scientific=TRUE)
     #plot2(cii, color_mode="diverging", zlim=c(2, 3, 5))
     plot2(cii, color_mode="diverging", zlim=c(5, 3, 2), surfL="midthickness", surfR="midthickness")
     print("qualitative")

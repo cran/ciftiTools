@@ -20,7 +20,9 @@ The new \code{"surf"}
 }
 \description{
 Resample a \code{"surf"} by writing it to a GIFTI, using the Connectome
-Workbench to resample it, and then reading the new file.
+Workbench to resample it, and then reading the new file. The barycentric
+resampling method, which is recommended for anatomical surfaces, will be
+used.
 }
 \section{Connectome Workbench}{
 

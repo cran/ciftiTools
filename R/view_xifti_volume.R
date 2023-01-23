@@ -118,7 +118,7 @@
 #'  display static 2D slices. Default: \code{FALSE}.
 #'
 #'  Note that the widget can only display one \code{idx} at a time.
-#' 
+#'
 #'  Note: \code{papayar} has been removed
 #'  from CRAN so the widget is not available. If \code{papayar} returns to CRAN
 #'  the widget will be made available again.
@@ -170,6 +170,8 @@
 #'  The color legend (qualitative data) cannot be embedded at the moment.
 #' @param digits The number of digits for the colorbar legend ticks.
 #'  If \code{NULL} (default), let \code{\link{format}} decide.
+#' @param scientific Use scientific notation? If \code{NA} (default), let
+#'  \code{\link{format}} decide.
 #' @param cex.title Font size multiplier for the title. \code{NULL} (default)
 #'  will use \code{1.2} for titles less than 20 characters long, and smaller
 #'  sizes for increasingly longer titles. If saving a PNG and PDF file, the default
@@ -180,9 +182,12 @@
 #'  or down (\code{ypos.title}) or left or right (\code{xpos.title}).
 #' @param orientation_labels Show orientation labels at the top left and top
 #'  right of the plot? These will indicate the directions along the left-right
-#'  axis for each slice image. Default: \code{FALSE}. Ignored if \code{widget}.
+#'  axis for each slice image. Default: \code{TRUE}. Ignored if \code{widget}.
 #'  The vertical positioning is controlled by \code{ypos.title}, and the font
 #'  size is controlled by \code{cex.title}.
+#' @param crop Crop the slice subplots to the subcortical structures, instead of
+#'  showing the full anatomical image? Default: \code{TRUE}. 
+#'  Ignored if \code{widget}.
 #' @param text_color Color for text in title and colorbar legend. Default:
 #'  \code{"white"}. If \code{"white"}, will use black instead for the color
 #   legend and the color bar if printed separately (since those will have
@@ -224,8 +229,10 @@ view_xifti_volume <- function(
   widget=FALSE,
   fname=FALSE, fname_suffix=c("names", "idx"), fname_sub=FALSE,
   legend_fname="[fname]_legend",
-  legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL, digits=NULL,
-  cex.title=NULL, ypos.title=0, xpos.title=0, orientation_labels=FALSE,
+  legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL,
+  digits=NULL, scientific=NA,
+  cex.title=NULL, ypos.title=0, xpos.title=0, 
+  orientation_labels=TRUE, crop=TRUE,
   text_color="white", bg=NULL, width=NULL, height=NULL, ...) {
 
   # ----------------------------------------------------------------------------
@@ -674,7 +681,7 @@ view_xifti_volume <- function(
   }
 
   # ----------------------------------------------------------------------------
-  # Get the colorbar/legend arguments. ----------------------------------------
+  # Get the colorbar/legend arguments. -----------------------------------------
   # ----------------------------------------------------------------------------
 
   any_colors <- !all(is.na(values))
@@ -689,7 +696,7 @@ view_xifti_volume <- function(
           "Embedding a color bar that shows the colors in order, instead of the color legend. ",
           "To view the color legend separately (as recommended) set `legend_embed` to `FALSE`.\n"
         )
-        colorbar_kwargs <- view_xifti.cbar(pal_base, pal, color_mode, text_color, digits) # added?
+        colorbar_kwargs <- view_xifti.cbar(pal_base, pal, color_mode, text_color, digits, scientific=scientific) # added?
       } else {
         legend_embed <- FALSE; use_cleg <- TRUE
         # Get the labels for the color legend list.
@@ -742,7 +749,8 @@ view_xifti_volume <- function(
       if (together_leg) { legend_embed <- FALSE }
       colorbar_kwargs <- view_xifti.cbar(
         pal_base, pal, color_mode,
-        ifelse(legend_embed || (!use_cleg && together && !comp_dummy), text_color, text_color2), digits
+        ifelse(legend_embed || (!use_cleg && together && !comp_dummy), text_color, text_color2),
+        digits, scientific=scientific
       )
     }
 
@@ -890,15 +898,28 @@ view_xifti_volume <- function(
     img_labels@.Data <- labs_bs
     img_labels@.Data[labs_bs==0] <- NA
 
+    if (crop) {
+      crop_x <- which(apply(!is.na(img_overlay@.Data), 1, any))
+      crop_x <- seq(min(crop_x), max(crop_x))
+      crop_y <- which(apply(!is.na(img_overlay@.Data), 2, any))
+      crop_y <- seq(min(crop_y), max(crop_y))
+      crop_z <- which(apply(!is.na(img_overlay@.Data), 3, any))
+      crop_z <- seq(min(crop_z), max(crop_z))
+    } else {
+      crop_x <- seq(dim(img_overlay@.Data)[1])
+      crop_y <- seq(dim(img_overlay@.Data)[2])
+      crop_z <- seq(dim(img_overlay@.Data)[3])
+    }
+
     if (plane=="axial") {
-      img2 <- img[,,slices]
-      img_overlay2 <- img_overlay[,,slices,drop=FALSE]
+      img2 <- img[crop_x,crop_y,slices]
+      img_overlay2 <- img_overlay[crop_x,crop_y,slices,drop=FALSE]
     } else if (plane=="coronal") {
-      img2 <- img[,slices,]
-      img_overlay2 <- img_overlay[,slices,,drop=FALSE]
+      img2 <- img[crop_x,slices,crop_z]
+      img_overlay2 <- img_overlay[crop_x,slices,crop_z,drop=FALSE]
     } else if (plane=="sagittal") {
-      img2 <- img[slices,,]
-      img_overlay2 <- img_overlay[slices,,,drop=FALSE]
+      img2 <- img[slices,crop_y,crop_z]
+      img_overlay2 <- img_overlay[slices,crop_y,crop_z,drop=FALSE]
     } else { stop() }
 
     oro.nifti::overlay(
@@ -1122,13 +1143,16 @@ view_cifti_volume <- function(
   color_mode="auto", zlim=NULL, colors=NULL,
   structural_img_colors=gray(0:255/280), title=NULL,
   idx=NULL, plane=c("axial", "sagittal", "coronal"),
+  convention=c("neurological", "radiological"),
   n_slices=9, slices=NULL,
   together=NULL, together_ncol=NULL, together_title=NULL,
   widget=FALSE,
   fname=FALSE, fname_suffix=c("names", "idx"), fname_sub=FALSE,
   legend_fname="[fname]_legend",
-  legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL, digits=NULL,
-  cex.title=NULL, ypos.title=0, xpos.title=0,
+  legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL,
+  digits=NULL, scientific=NA,
+  cex.title=NULL, ypos.title=0, xpos.title=0, 
+  orientation_labels=TRUE, crop=TRUE,
   text_color="white", bg=NULL, width=NULL, height=NULL, ...) {
 
   view_xifti_volume(
@@ -1136,13 +1160,16 @@ view_cifti_volume <- function(
     color_mode=color_mode, zlim=zlim, colors=colors,
     structural_img_colors=structural_img_colors, title=title,
     idx=idx, plane=plane,
+    convention=convention,
     n_slices=n_slices, slices=slices,
     together=together, together_ncol=together_ncol, together_title=together_title,
     widget=widget,
     fname=fname, fname_suffix=fname_suffix, fname_sub=fname_sub,
     legend_fname=legend_fname,
-    legend_ncol=legend_ncol, legend_alllevels=legend_alllevels, legend_embed=legend_embed, digits=digits,
+    legend_ncol=legend_ncol, legend_alllevels=legend_alllevels, legend_embed=legend_embed,
+    digits=digits, scientific=scientific,
     cex.title=cex.title, ypos.title=ypos.title, xpos.title=xpos.title,
+    orientation_labels=orientation_labels, crop=crop,
     text_color=text_color, bg=bg, width=width, height=height, ...
   )
 }
@@ -1154,13 +1181,16 @@ viewCIfTI_volume <- function(
   color_mode="auto", zlim=NULL, colors=NULL,
   structural_img_colors=gray(0:255/280), title=NULL,
   idx=NULL, plane=c("axial", "sagittal", "coronal"),
+  convention=c("neurological", "radiological"),
   n_slices=9, slices=NULL,
   together=NULL, together_ncol=NULL, together_title=NULL,
   widget=FALSE,
   fname=FALSE, fname_suffix=c("names", "idx"), fname_sub=FALSE,
   legend_fname="[fname]_legend",
-  legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL, digits=NULL,
-  cex.title=NULL, ypos.title=0, xpos.title=0,
+  legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL,
+  digits=NULL, scientific=NA,
+  cex.title=NULL, ypos.title=0, xpos.title=0, 
+  orientation_labels=TRUE, crop=TRUE,
   text_color="white", bg=NULL, width=NULL, height=NULL, ...) {
 
   view_xifti_volume(
@@ -1168,13 +1198,16 @@ viewCIfTI_volume <- function(
     color_mode=color_mode, zlim=zlim, colors=colors,
     structural_img_colors=structural_img_colors, title=title,
     idx=idx, plane=plane,
+    convention=convention,
     n_slices=n_slices, slices=slices,
     together=together, together_ncol=together_ncol, together_title=together_title,
     widget=widget,
     fname=fname, fname_suffix=fname_suffix, fname_sub=fname_sub,
     legend_fname=legend_fname,
-    legend_ncol=legend_ncol, legend_alllevels=legend_alllevels, legend_embed=legend_embed, digits=digits,
+    legend_ncol=legend_ncol, legend_alllevels=legend_alllevels, legend_embed=legend_embed,
+    digits=digits, scientific=scientific,
     cex.title=cex.title, ypos.title=ypos.title, xpos.title=xpos.title,
+    orientation_labels=orientation_labels, crop=crop,
     text_color=text_color, bg=bg, width=width, height=height, ...
   )
 }
@@ -1186,13 +1219,16 @@ viewcii_volume <- function(
   color_mode="auto", zlim=NULL, colors=NULL,
   structural_img_colors=gray(0:255/280), title=NULL,
   idx=NULL, plane=c("axial", "sagittal", "coronal"),
+  convention=c("neurological", "radiological"),
   n_slices=9, slices=NULL,
   together=NULL, together_ncol=NULL, together_title=NULL,
   widget=FALSE,
   fname=FALSE, fname_suffix=c("names", "idx"), fname_sub=FALSE,
   legend_fname="[fname]_legend",
-  legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL, digits=NULL,
-  cex.title=NULL, ypos.title=0, xpos.title=0,
+  legend_ncol=NULL, legend_alllevels=FALSE, legend_embed=NULL,
+  digits=NULL, scientific=NA,
+  cex.title=NULL, ypos.title=0, xpos.title=0, 
+  orientation_labels=TRUE, crop=TRUE,
   text_color="white", bg=NULL, width=NULL, height=NULL, ...) {
 
   view_xifti_volume(
@@ -1200,13 +1236,16 @@ viewcii_volume <- function(
     color_mode=color_mode, zlim=zlim, colors=colors,
     structural_img_colors=structural_img_colors, title=title,
     idx=idx, plane=plane,
+    convention=convention,
     n_slices=n_slices, slices=slices,
     together=together, together_ncol=together_ncol, together_title=together_title,
     widget=widget,
     fname=fname, fname_suffix=fname_suffix, fname_sub=fname_sub,
     legend_fname=legend_fname,
-    legend_ncol=legend_ncol, legend_alllevels=legend_alllevels, legend_embed=legend_embed, digits=digits,
+    legend_ncol=legend_ncol, legend_alllevels=legend_alllevels, legend_embed=legend_embed,
+    digits=digits, scientific=scientific,
     cex.title=cex.title, ypos.title=ypos.title, xpos.title=xpos.title,
+    orientation_labels=orientation_labels, crop=crop,
     text_color=text_color, bg=bg, width=width, height=height, ...
   )
 }

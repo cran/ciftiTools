@@ -32,10 +32,12 @@ view_xifti_volume(
   legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
+  scientific = NA,
   cex.title = NULL,
   ypos.title = 0,
   xpos.title = 0,
-  orientation_labels = FALSE,
+  orientation_labels = TRUE,
+  crop = TRUE,
   text_color = "white",
   bg = NULL,
   width = NULL,
@@ -53,6 +55,7 @@ view_cifti_volume(
   title = NULL,
   idx = NULL,
   plane = c("axial", "sagittal", "coronal"),
+  convention = c("neurological", "radiological"),
   n_slices = 9,
   slices = NULL,
   together = NULL,
@@ -67,9 +70,12 @@ view_cifti_volume(
   legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
+  scientific = NA,
   cex.title = NULL,
   ypos.title = 0,
   xpos.title = 0,
+  orientation_labels = TRUE,
+  crop = TRUE,
   text_color = "white",
   bg = NULL,
   width = NULL,
@@ -87,6 +93,7 @@ viewCIfTI_volume(
   title = NULL,
   idx = NULL,
   plane = c("axial", "sagittal", "coronal"),
+  convention = c("neurological", "radiological"),
   n_slices = 9,
   slices = NULL,
   together = NULL,
@@ -101,9 +108,12 @@ viewCIfTI_volume(
   legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
+  scientific = NA,
   cex.title = NULL,
   ypos.title = 0,
   xpos.title = 0,
+  orientation_labels = TRUE,
+  crop = TRUE,
   text_color = "white",
   bg = NULL,
   width = NULL,
@@ -121,6 +131,7 @@ viewcii_volume(
   title = NULL,
   idx = NULL,
   plane = c("axial", "sagittal", "coronal"),
+  convention = c("neurological", "radiological"),
   n_slices = 9,
   slices = NULL,
   together = NULL,
@@ -135,9 +146,12 @@ viewcii_volume(
   legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
+  scientific = NA,
   cex.title = NULL,
   ypos.title = 0,
   xpos.title = 0,
+  orientation_labels = TRUE,
+  crop = TRUE,
   text_color = "white",
   bg = NULL,
   width = NULL,
@@ -305,6 +319,9 @@ The color legend (qualitative data) cannot be embedded at the moment.}
 \item{digits}{The number of digits for the colorbar legend ticks.
 If \code{NULL} (default), let \code{\link{format}} decide.}
 
+\item{scientific}{Use scientific notation? If \code{NA} (default), let
+\code{\link{format}} decide.}
+
 \item{cex.title}{Font size multiplier for the title. \code{NULL} (default)
 will use \code{1.2} for titles less than 20 characters long, and smaller
 sizes for increasingly longer titles. If saving a PNG and PDF file, the default
@@ -317,9 +334,13 @@ or down (\code{ypos.title}) or left or right (\code{xpos.title}).}
 
 \item{orientation_labels}{Show orientation labels at the top left and top
 right of the plot? These will indicate the directions along the left-right
-axis for each slice image. Default: \code{FALSE}. Ignored if \code{widget}.
+axis for each slice image. Default: \code{TRUE}. Ignored if \code{widget}.
 The vertical positioning is controlled by \code{ypos.title}, and the font
 size is controlled by \code{cex.title}.}
+
+\item{crop}{Crop the slice subplots to the subcortical structures, instead of
+showing the full anatomical image? Default: \code{TRUE}.
+Ignored if \code{widget}.}
 
 \item{text_color}{Color for text in title and colorbar legend. Default:
 \code{"white"}. If \code{"white"}, will use black instead for the color}

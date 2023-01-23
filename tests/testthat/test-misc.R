@@ -36,6 +36,34 @@ test_that("Miscellaneous functions are working", {
   # List Options
   ciftiTools.listOptions()
 
+  # Surface mask manipulation
+  cii_fname <- fnames$cifti[1]
+  cii <- read_cifti(cii_fname, brainstructures="left", surfL_fname="inflated", idx=1)
+  cii <- cii > 1.5
+  cii2 <- dilate_mask_surf(
+    cii$data$cortex_left[,1],
+    cii$meta$cortex$medial_wall_mask$left,
+    cii$surf$cortex_left,
+    hemisphere="left"
+  )
+  plot(cii+as.matrix(as.numeric(cii2))); rgl::rgl.close()
+  cii2 <- edit_mask_surf(
+    cii$data$cortex_left[,1],
+    cii$meta$cortex$medial_wall_mask$left,
+    cii$surf$cortex_left,
+    hemisphere="left",
+    depth=4
+  )
+  plot(cii+as.matrix(as.numeric(cii2)), zlim=c(0, 2)); rgl::rgl.close()
+  plot(cii); rgl::rgl.close()
+  plot(make_surf(
+    c(mask_surf(
+      cii$surf$cortex_left$vertices,
+      cii$surf$cortex_left$faces,
+      move_from_mwall(cii)$data$cortex_left[,1]
+    ), list(hemisphere="left"))
+  )); rgl::rgl.close()
+
   for (cii_fname in fnames$cifti) {
     cat("\n\n"); cat(cii_fname); cat("\n\n")
 
@@ -83,6 +111,9 @@ test_that("Miscellaneous functions are working", {
     cii_t <- convert_xifti(cii, "dtseries")
     if (!grepl("ones", cii_fname)) {
       cii_l <- convert_xifti(cii, "dlabel", nsig=3)
+      cii_l1 <- select_xifti(cii, 1)
+      cii_l1$data$cortex_left[1,] <- NA; cii_l1$data$cortex_left[seq(2, 100),] <- NaN
+      cii_l1 <- convert_xifti(cii_l1, "dlabel", nsig=1, colors=c("grey", "blue"), add_white=FALSE)
       cii_l1 <- read_xifti(convert_xifti(cii_fname, "dlabel", file.path(tdir, "cii.dlabel.nii"), nsig=3), brainstructures = brainstructures)
     }
     cii_s1 <- read_xifti(convert_xifti(cii_fname, "dscalar", file.path(tdir, "cii.dscalar.nii")), brainstructures = brainstructures)
@@ -106,19 +137,19 @@ test_that("Miscellaneous functions are working", {
     }
     testthat::expect_equal(cii, cii2)
 
-    # unmask_cortex
-    if (!is.null(cii$data$cortex_left)) {
-      cor2 <- unmask_cortex(
-        cii$data$cortex_left,
-        cii$meta$cortex$medial_wall_mask$left
-      )
-    }
-    if (!is.null(cii$data$cortex_right)) {
-      cor2 <- unmask_cortex(
-        cii$data$cortex_right,
-        cii$meta$cortex$medial_wall_mask$right
-      )
-    }
+    # # fMRItools::unmask_mat
+    # if (!is.null(cii$data$cortex_left)) {
+    #   cor2 <- fMRItools::unmask_mat(
+    #     cii$data$cortex_left,
+    #     cii$meta$cortex$medial_wall_mask$left
+    #   )
+    # }
+    # if (!is.null(cii$data$cortex_right)) {
+    #   cor2 <- fMRItools::unmask_mat(
+    #     cii$data$cortex_right,
+    #     cii$meta$cortex$medial_wall_mask$right
+    #   )
+    # }
 
     # unmask_subcortex
     if (!is.null(cii$data$subcort)) {
@@ -175,6 +206,13 @@ test_that("Miscellaneous functions are working", {
     stopifnot(max(abs(as.matrix(
       newdata_xifti(cii2, 17) - newdata_xifti(cii2, 10) - newdata_xifti(cii2, 7)
     ))) == 0)
+    stopifnot(max(abs(as.matrix(
+      newdata_xifti(cii2, 17) - 10
+    ) - 7)) == 0)
+    stopifnot(max(abs(as.matrix(
+      newdata_xifti(cii2, 17) - matrix(10, nrow=nrow(as.matrix(cii2)), ncol=ncol(as.matrix(cii2))) - 7
+    ))) == 0)
+
 
     if (!grepl("dlabel", cii_fname)) {
       # Smooth metric GIFTI

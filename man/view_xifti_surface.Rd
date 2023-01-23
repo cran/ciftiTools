@@ -30,6 +30,7 @@ view_xifti_surface(
   legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
+  scientific = NA,
   cex.title = NULL,
   text_color = "black",
   bg = NULL,
@@ -67,6 +68,7 @@ view_cifti_surface(
   legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
+  scientific = NA,
   cex.title = NULL,
   text_color = "black",
   bg = NULL,
@@ -103,6 +105,7 @@ viewCIfTI_surface(
   legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
+  scientific = NA,
   cex.title = NULL,
   text_color = "black",
   bg = NULL,
@@ -139,6 +142,7 @@ viewcii_surface(
   legend_alllevels = FALSE,
   legend_embed = NULL,
   digits = NULL,
+  scientific = NA,
   cex.title = NULL,
   text_color = "black",
   bg = NULL,
@@ -304,6 +308,9 @@ or if \code{"leg" \%in\% together}. Otherwise the color legend
 \item{digits}{The number of digits for the colorbar legend ticks.
 If \code{NULL} (default), let \code{\link{format}} decide.}
 
+\item{scientific}{Use scientific notation? If \code{NA} (default), let
+\code{\link{format}} decide.}
+
 \item{cex.title}{Font size multiplier for the title. \code{NULL} (default)
 will use \code{2} for titles less than 20 characters long, and smaller
 sizes for increasingly longer titles.}
@@ -334,7 +341,7 @@ not outline the edges).}
 \item{vertex_size}{Draw each vertex with this size. Default: \code{0}
 (do not draw the vertices).}
 
-\item{material}{A list of materials from \code{\link[rgl]{rgl.material}}
+\item{material}{A list of materials from \code{\link[rgl]{material3d}}
 to use. For example, \code{list(lit=FALSE, smooth=FALSE)} will use exact colors
 from the color scale, rather than adding geometric shading and interpolating
 vertex colors. If \code{NULL}, use defaults.}
@@ -381,8 +388,8 @@ drag the cursor to rotate the meshes. Use the scroll wheel or right click
 and drag to zoom. Press the scroll wheel and drag to change the field-of-view.
 For Open GL windows, execute
 \code{\link[rgl]{snapshot}} to save the current window as a .png file,
-\code{\link[rgl:rgl.open]{rgl.close}} to close the window, and
-\code{\link[rgl:viewpoint]{rgl.viewpoint}} to programmatically control the
+\code{\link[rgl:open3d]{close3d}} to close the window, and
+\code{\link[rgl:viewpoint]{view3d}} to programmatically control the
 perspective.
 
 To embed an interactive plot in an R Markdown document, first execute

@@ -23,6 +23,21 @@ the data and metadata, and includes support for surface geometry files
 to enable spatially-dependent functionality such as static or
 interactive visualizations and smoothing.
 
+## Citation
+
+If you use `ciftiTools`, please cite our
+[paper](https://doi.org/10.1016/j.neuroimage.2022.118877):
+
+> Pham, D. D., Muschelli, J., & Mejia, A. F. (2022). ciftiTools: A
+> package for reading, writing, visualizing, and manipulating CIFTI
+> files in R. NeuroImage, 250, 118877.
+
+You can also obtain citation information from within R like so:
+
+``` r
+citation("ciftiTools")
+```
+
 ## Installation
 
 You can install `ciftiTools` from [CRAN](https://cran.r-project.org/)
@@ -90,15 +105,24 @@ to view the tutorial vignette.
 ## Illustrations
 
 <figure>
-<img src="README_media/ciftiTools_summary.png" style="width:70.0%" alt="ciftiTools graphical summary" /><figcaption aria-hidden="true">ciftiTools graphical summary</figcaption>
+<img src="README_media/ciftiTools_summary.png" style="width:70.0%"
+alt="ciftiTools graphical summary" />
+<figcaption aria-hidden="true">ciftiTools graphical summary</figcaption>
 </figure>
 
 <figure>
-<img src="README_media/xifti_structure.png" style="width:70.0%" alt="“xifti” object structure" /><figcaption aria-hidden="true">“xifti” object structure</figcaption>
+<img src="README_media/xifti_structure.png" style="width:70.0%"
+alt="“xifti” object structure" />
+<figcaption aria-hidden="true">“xifti” object structure</figcaption>
 </figure>
 
 <figure>
-<img src="README_media/surf_tour.gif" style="width:40.0%" alt="Surfaces comparison. The “very inflated”, “inflated”, and “midthickness” surfaces are included in ciftiTools through the function load_surf. See the data acknowledgement section at the bottom of this README." /><figcaption aria-hidden="true">Surfaces comparison. The “very inflated”, “inflated”, and “midthickness” surfaces are included in ciftiTools through the function <code>load_surf</code>. See the data acknowledgement section at the bottom of this README.</figcaption>
+<img src="README_media/surf_tour.gif" style="width:25.0%"
+alt="Surfaces comparison. The “very inflated”, “inflated”, and “midthickness” surfaces are included in ciftiTools through the function load_surf. See the data acknowledgement section at the bottom of this README." />
+<figcaption aria-hidden="true">Surfaces comparison. The “very inflated”,
+“inflated”, and “midthickness” surfaces are included in ciftiTools
+through the function <code>load_surf</code>. See the data
+acknowledgement section at the bottom of this README.</figcaption>
 </figure>
 
 ## FAQ
@@ -117,6 +141,18 @@ plot(xii)
 We can also convert metric GIFTI files and/or NIFTI files to CIFTI files
 (or vice versa) using the `"xifti"` object as an intermediary.
 
+#### How do I visualize cortical data without applying shading to the mesh geometry?
+
+The 3D shading may make certain plots more difficult to interpret, if
+the color scale varies from light to dark: darker regions might be in a
+shadow, or their values might be higher. To skip shading, use the
+argument `material=list(lit=FALSE)` to `view_xifti_surface`.
+
+<img src="README_media/vxs_lit.png" style="width:15.0%"
+alt="Lit surface plot" />
+<img src="README_media/vxs_unlit.png" style="width:15.0%"
+alt="Unlit surface plot" />
+
 ## Related R extensions
 
 -   NIFTI files:
@@ -132,11 +168,6 @@ We can also convert metric GIFTI files and/or NIFTI files to CIFTI files
 -   xml files: [`xml2`](https://CRAN.R-project.org/package=xml2)
 -   Interactive 3D rendering:
     [`rgl`](https://CRAN.R-project.org/package=rgl)
-
-## Citation
-
-You can cite our paper at
-<https://doi.org/10.1016/j.neuroimage.2022.118877>.
 
 ## Data acknowledgement
 

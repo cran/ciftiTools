@@ -267,9 +267,11 @@ resample_cifti_default_fname <- function(original_fname, resamp_res) {
 #' @param mwall_fill The fill value to use for medial wall vertices.
 #' @return The unmasked cortex data
 #'
-#' @export
+#' @keywords internal
 #'
 unmask_cortex <- function(cortex, mwall, mwall_fill=NA) {
+  # This function is internal because people should import
+  #   `fMRItools::unmask_mat` instead of this.
   cdat <- matrix(mwall_fill, nrow=length(mwall),  ncol=ncol(cortex))
   cdat[mwall,] <- cortex
   cdat
@@ -415,6 +417,13 @@ infer_resolution <- function(xifti, surfL=NULL, surfR=NULL) {
       if (is.null(xifti$data$cortex_right) && is.null(xifti$meta$cortex$medial_wall_mask$right)) {
         res[2] <- 0
       }
+    }
+  } else {
+    if (is.na(res[1]) && !("left" %in% xifti$meta$cifti$brainstructures)) {
+      res[1] <- 0
+    }
+    if (is.na(res[2]) && !("right" %in% xifti$meta$cifti$brainstructures)) {
+      res[2] <- 0
     }
   }
 
