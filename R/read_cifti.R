@@ -26,7 +26,7 @@
 #'  have to be read in with \code{-cifti-separate}, which is slower than 
 #'  \code{-cifti-convert -to-gifti-ext}.
 #' @inheritParams resamp_method_Param
-#' @inheritParams resamp_area_Param
+#' @inheritParams resamp_area_noOG_Param
 #' @param flat Should the result be flattened into a single matrix?
 #' 
 #'  If \code{FALSE} (default), the result will be a \code{"xifti"} object.
@@ -138,8 +138,7 @@ read_cifti <- function(
       surfL_fname=surfL_fname, surfR_fname=surfR_fname,
       brainstructures=brainstructures, idx=idx,
       resamp_res=resamp_res, resamp_method=resamp_method,
-      areaL_original_fname=areaL_original_fname, 
-      areaR_original_fname=areaR_original_fname,
+      areaL_original_fname=areaL_original_fname, areaR_original_fname=areaR_original_fname,
       mwall_values=mwall_values, verbose=verbose,
       ...
     ))
@@ -162,8 +161,7 @@ readCIfTI <- function(
     surfL_fname=surfL_fname, surfR_fname=surfR_fname,
     brainstructures=brainstructures, idx=idx,
     resamp_res=resamp_res, resamp_method=resamp_method,
-    areaL_original_fname=areaL_original_fname, 
-    areaR_original_fname=areaR_original_fname,
+    areaL_original_fname=areaL_original_fname, areaR_original_fname=areaR_original_fname,
     flat=flat, 
     mwall_values=mwall_values, verbose=verbose, ...
   )
@@ -185,8 +183,7 @@ readcii <- function(
     surfL_fname=surfL_fname, surfR_fname=surfR_fname,
     brainstructures=brainstructures, idx=idx,
     resamp_res=resamp_res, resamp_method=resamp_method,
-    areaL_original_fname=areaL_original_fname, 
-    areaR_original_fname=areaR_original_fname,
+    areaL_original_fname=areaL_original_fname, areaR_original_fname=areaR_original_fname,
     flat=flat, 
     mwall_values=mwall_values, verbose=verbose, ...
   )
@@ -208,8 +205,7 @@ read_xifti <- function(
     surfL_fname=surfL_fname, surfR_fname=surfR_fname,
     brainstructures=brainstructures, idx=idx,
     resamp_res=resamp_res, resamp_method=resamp_method,
-    areaL_original_fname=areaL_original_fname, 
-    areaR_original_fname=areaR_original_fname,
+    areaL_original_fname=areaL_original_fname, areaR_original_fname=areaR_original_fname,
     flat=flat, 
     mwall_values=mwall_values, verbose=verbose, ...
   )

@@ -154,6 +154,22 @@ NULL
 #' @keywords internal
 NULL
 
+#' resamp_area_noOG_Param
+#' 
+#' @param areaL_original_fname,areaR_original_fname File paths to the surfaces 
+#'  to use for vertex area correction during adaptive resampling. (Only used if
+#'  resampling with the adaptive method.) \code{area[L/R]_fname} should
+#'  match the current resolution of the data.
+#' 
+#'  The Workbench command for adaptive resampling requires the target surfaces
+#'  for area correction too, but to make the workflow easier \code{ciftiTools}
+#'  will resample \code{area[L/R]_fname} with the barycentric method 
+#'  and use that for the target surface. 
+#' 
+#' @name resamp_area_noOG_Param
+#' @keywords internal
+NULL
+
 #' ROI_brainstructures
 #'
 #' @param ROI_brainstructures Character vector indicating which ROIs should be
@@ -359,6 +375,8 @@ NULL
 #' @param bg Background color. \code{NULL} will use \code{"white"}. Does not affect
 #'  the color legend or color bar if printed separately: those will always have
 #'  white backgrounds.
+#' @param NA_color The color for the medial wall and \code{NA} values. Default:
+#'  \code{"white"}. Also used to color the entire surface for `view_surf`.
 #' @param alpha Transparency value for mesh coloring, between 0 and 1. Default:
 #'  \code{1.0} (no transparency).
 #' @param edge_color Outline each edge in this color. Default: \code{NULL} (do
