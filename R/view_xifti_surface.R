@@ -148,7 +148,7 @@ view_xifti_surface.mesh_val <- function(xifti, surfL, surfR, hemisphere, idx, ma
       if (is.null(res_h) || (!is.null(xifti$data[[cor_h]]) && (nrow(xifti$data[[cor_h]]) != res_h))) {
         stop(
           "Cannot infer medial wall locations on ", h,
-          " cortex. Please provide $meta$cortex$medial_wall_mask$", cor_h
+          " cortex. Please provide $meta$cortex$medial_wall_mask$", h
         )
       } else {
         mwall_h <- rep(TRUE, res_h)
@@ -1127,8 +1127,8 @@ view_xifti_surface <- function(
             # Get the color legend list dimensions.
             if (is.null(legend_ncol)) {
               legend_ncol <- max(1, floor(.8 * sqrt(nrow(cleg))))
-              colorlegend_nrow <- ceiling(nrow(cleg) / legend_ncol)
             }
+            colorlegend_nrow <- ceiling(nrow(cleg) / legend_ncol)
             cleg <- view_xifti.cleg(cleg, legend_ncol, text_color)
           }
         }
