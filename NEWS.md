@@ -1,3 +1,26 @@
+# 17.4
+
+* Set read/write default for `brainstructures` to `"existing"` (rather than all or just cortex).
+* `impute_xifti`: Add this function which imputes values based on nearby locations.
+* `newdata_xifti` and `as.matrix`: Add `subcortex_by_bs` argument.
+* `make_xifti`: Allow character input for intent.
+* `convert_xifti`: Keep old names and labels if present.
+* Update workbench path for Mac
+* Convert unacceptable subcortex brain structures to "Other"
+* Fixes to `match_exactly`.
+* Clean up package and documentation.
+
+# 16.1
+
+* `move_to_submask` and `move_from_submask`
+* add support for writing older xiftis w/o "Other" level in sub labels
+* fix subcortex bugs
+
+# 15.0
+
+* Make default of `read_cifti` all brain structures, instead of left and right cortex only
+* add "Other" to subcortex levels
+
 # 14.0
 
 Minor fixes and improvements.

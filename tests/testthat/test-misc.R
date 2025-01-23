@@ -57,10 +57,10 @@ test_that("Miscellaneous functions are working", {
   plot(cii+as.matrix(as.numeric(cii2)), zlim=c(0, 2)); rgl::close3d()
   plot(cii); rgl::close3d()
   plot(make_surf(
-    c(mask_surf(
+    mask_surf(
       cii$surf$cortex_left,
       move_from_mwall(cii)$data$cortex_left[,1]
-    ), list(hemisphere="left"))
+    )
   )); rgl::close3d()
 
   for (cii_fname in fnames$cifti) {
@@ -191,6 +191,44 @@ test_that("Miscellaneous functions are working", {
       cii2 <- move_from_submask(cii$meta$subcort$mask)
     }
 
+    # `impute_xifti`
+    cii <- read_cifti(cii_fname)
+    #if (grepl("ones_1k", cii_fname)) { cii <- newdata_xifti(cii, seq(prod(dim(cii)))) }
+    if (ncol(cii) < 2) { cii <- select_xifti(cii, c(1,1)) }
+    cii <- add_surf(cii, "midthickness", "midthickness")
+    cii_x <- cii
+    cii_x$data$cortex_left[,2] <- ifelse(
+      rnorm(nrow(cii_x$data$cortex_left)) > 0,
+      NA, cii_x$data$cortex_left[,2]
+    )
+    cii_x$data$cortex_right[seq(floor(nrow(cii_x$data$cortex_right)/5)),] <- NA
+    if (!is.null(cii_x$data$subcort)) {
+      cii_x$data$subcort[,1] <- ifelse(
+        rnorm(nrow(cii_x$data$subcort)) > 1,
+        NA, cii_x$data$subcort[,1]
+      )
+    }
+    cii_i <- impute_xifti(cii_x, impute_FUN = length)
+    z <- merge_xifti(select_xifti(cii_x, 2), select_xifti(cii_i, 2))
+    plt <- plot(
+      z, idx=seq(2), together="idx", widget=FALSE,
+      fname=file.path(tempdir(), "x.png"),
+      material=list(lit=FALSE, smooth=FALSE), edge_color="black"
+    )
+
+    cii_xi <- select_xifti(cii, 2)
+    cii_xi <- remove_xifti(cii_xi, "cortex_left")
+    i_mask <- !(as.matrix(cii_xi) %in% c(min(cii_xi), max(cii_xi)))
+    if (grepl("label", cii_fname)) {
+      cii_i <- impute_xifti(cii_xi, function(x){x[which(!is.na(x))[1]]}, mask=i_mask)
+    } else {
+      cii_i <- impute_xifti(cii_xi, mask=i_mask)
+      cii_xi <- newdata_xifti(cii_xi, ifelse(!i_mask, as.matrix(cii_xi), NA))
+      cii_i2 <- impute_xifti(cii_xi)
+      print(summary(cii_i2))
+      testthat::expect_equal(max(cii_i- cii_i2), 0)
+    }
+
     # Operations
     # warnings should happen for dlabel file
     if (grepl("label", cii_fname)) {
@@ -300,7 +338,7 @@ test_that("Miscellaneous functions are working", {
 
   # parcellation functions
   ### dummy data
-  cii <- read_cifti(ciftiTools.files()$cifti["dscalar_ones"], brainstructures="all", resamp_res=32000)
+  cii <- read_cifti(ciftiTools.files()$cifti["dscalar_ones"], resamp_res=32000)
   cii <- newdata_xifti(cii, cbind(as.matrix(cii), as.matrix(cii)+rnorm(prod(dim(cii)))))
   cii <- newdata_xifti(cii, cbind(as.matrix(cii), as.matrix(cii)+rnorm(prod(dim(cii)))))
   # tests
@@ -311,4 +349,25 @@ test_that("Miscellaneous functions are working", {
 
   # unmask_subcortex
   q <- unmask_subcortex(cii)
+
+  # More `impute_xifti` tests
+  cii <- read_cifti(ciftiTools.files()$cifti["dscalar_ones"])
+  cii <- add_surf(cii, surfL="inflated")
+  my_vec <- c(0, rep(NA, 98), 1, NA, .1, NA, NA)
+  cii$data$cortex_left[] <- rep(my_vec, 500)[seq(nrow(cii$data$cortex_left))]
+  cii$data$subcort[] <- rep(my_vec, 5000)[seq(nrow(cii$data$subcort))]
+  cii2 <- impute_xifti(cii)
+  #plot(cii); plot(cii2)
+
+  # `subcort_by_bs`
+  cii <- read_cifti(ciftiTools.files()$cifti["dscalar_ones"])
+  cii <- newdata_xifti(cii, seq(prod(dim(cii))))
+  testthat::expect_equal(
+    cii$data,
+    newdata_xifti(cii, as.matrix(cii))$data
+  )
+  testthat::expect_equal(
+    cii$data,
+    newdata_xifti(cii, as.matrix(cii, subcortex_by_bs=TRUE), subcortex_by_bs=TRUE)$data
+  )
 })

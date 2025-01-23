@@ -1,8 +1,40 @@
-#' @describeIn convert_xifti
+#' Convert \code{"xifti"}
+#' 
+#' Convert the intent of a CIFTI file or \code{"xifti"} object
 #'
-#' Give the ".dlabel" intent (code 3007/ConnDenseLabel) to an input
-#'  \code{"xifti"}. Will use the same label table for each data column. Can also
-#'  be used to re-assign values in the label table, or to change label names.
+#' @param x The CIFTI file name or \code{"xifti"} object to convert.
+#' @param to The desired intent: \code{"dscalar"} (default), \code{"dtseries"},
+#'  or \code{"dlabel"}
+#' @param cifti_target_fname File name for the converted CIFTI. Only used if
+#'  \code{x} is a CIFTI file name. If \code{NULL} (default), will use the same
+#'  name as \code{x} but with the extension updated.
+#' @param ... Only used if \code{x} is a \code{"xifti"} object. Additional
+#'  options specific to the target type and intent, e.g. for
+#'  \code{convert_to_dlabel}.
+#'
+#' @return If \code{x} is a CIFTI, the target is a \code{"dlabel"} and
+#'  \code{return_conversion_table}, a length-2 list with the first entry being
+#'  the ".dlabel" \code{"xifti"} and the second being the conversion table.
+#'  Otherwise, the \code{"xifti"} or the output CIFTI file name is directly
+#'  returned.
+#'
+#' @family manipulating xifti
+#'
+#' @export
+convert_xifti <- function(x, to=c("dscalar", "dtseries", "dlabel"),
+  cifti_target_fname=NULL, ...){
+
+  to <- match.arg(to, c("dscalar", "dtseries", "dlabel"))
+
+  switch(to,
+      dscalar = convert_to_dscalar(x, cifti_target_fname, ...),
+      dtseries = convert_to_dtseries(x, cifti_target_fname, ...),
+      dlabel = convert_to_dlabel(x, cifti_target_fname, ...)
+  )
+}
+
+
+#' @rdname convert_xifti
 #'
 #' @param x The CIFTI file name or \code{"xifti"} object to convert.
 #' @param cifti_target_fname File name for the converted CIFTI. Only used if
@@ -21,15 +53,17 @@
 #'  integers to use (rather than $0$ to $N-1$). If \code{x} is already "dlabel",
 #'  then by setting \code{levels_old} to the current label table values and
 #'  \code{levels} to the desired new values, the data can be re-leveled
-#'  (see examples in function documentation). Note that duplicates in 
-#'  \code{levels_old} are allowed, to map multiple existing levels to the same 
+#'  (see examples in function documentation). Note that duplicates in
+#'  \code{levels_old} are allowed, to map multiple existing levels to the same
 #'  new level.
 #'
-#'  New label names can be set with \code{labels}. If provided, it must be a 
-#'  character vector with the same length as \code{levels}. If there are 
+#'  New label names can be set with \code{labels}. If provided, it must be a
+#'  character vector with the same length as \code{levels}. If there are
 #'  duplicates in \code{levels}, the first label for a given level will be used.
-#'  If \code{labels} is not provided, the new label names will be set to 
-#'  \code{levels} if it was provided, and \code{levels_old} if it was not.
+#'  If \code{labels} is not provided and if \code{x} is already "dlabel", old
+#'  labels will be used if they are the same for each column; otherwise, if
+#'  the new label names will be set to \code{levels} if it was provided, and
+#'  \code{levels_old} if it was not.
 #'
 #'  Note: \code{NA} and \code{NaN} values are handled a bit differently. Data
 #'  locations that are \code{NA} or \code{NaN} will remain unchanged. \code{NA}
@@ -111,6 +145,7 @@ convert_to_dlabel <- function(x, cifti_target_fname=NULL,
     }
     # Notice: no sorting.
   }
+
   levels_old_hasNA <- any(is.na(levels_old) & !is.nan(levels_old))
   levels_old_hasNaN <- any(is.nan(levels_old))
   valfac_exclude <- list(
@@ -122,6 +157,17 @@ convert_to_dlabel <- function(x, cifti_target_fname=NULL,
   if (length(levels_old) > 1000) { warning("Over 1000 unique `levels_old` in the `xifti`.\n") }
   levels_old <- levels_old[!is.na(levels_old)]
 
+  if (is.null(labels)) {
+    # Use existing labels if present, and same w/ Key for each column.
+    if (length(x$meta$cifti$intent)==1 && x$meta$cifti$intent==3007) {
+      labels_old <-  unique(lapply(x$meta$cifti$labels, rownames))
+      len_unique_keys <- length(unique(lapply(x$meta$cifti$labels, '[[', "Key")))
+      if (length(labels_old)==1 && len_unique_keys==1) {
+        labels_old <- labels_old[[1]][match(levels_old, signif(x$meta$cifti$labels[[1]]$Key, nsig))]
+        labels <- labels_old
+      }
+    }
+  }
   if (is.null(labels)) {
     labels <- if (!is.null(levels)) {
       as.character(levels)
@@ -245,18 +291,14 @@ convert_to_dlabel <- function(x, cifti_target_fname=NULL,
   out
 }
 
-#' @describeIn convert_xifti
-#'
-#' Give the ".dscalar" intent (code 3006/ConnDenseScalar) to an input
-#'  CIFTI file or \code{"xifti"} object. Can also be used to set the names for
-#'  each column with \code{names}.
+#' @rdname convert_xifti
 #'
 #' @param x The CIFTI file name or \code{"xifti"} object to convert.
 #' @param cifti_target_fname File name for the converted CIFTI. Only used if
 #'  \code{x} is a CIFTI file name. If \code{NULL} (default), will use the same
 #'  name as \code{x} but with the extension updated.
-#' @param names The column names. If \code{NULL} (default), will be set to
-#'  "Column 1", "Column 2", ... .
+#' @param names The column names. If \code{NULL} (default) and \code{x} does not
+#'  already have names, the names will be set to "Column 1", "Column 2", ... .
 #'
 #' @export
 convert_to_dscalar <- function(x, cifti_target_fname=NULL, names=NULL) {
@@ -290,7 +332,9 @@ convert_to_dscalar <- function(x, cifti_target_fname=NULL, names=NULL) {
       }
       x$meta$cifti$names <- as.character(names)
     } else {
-      x$meta$cifti$names <- paste("Column", seq(T_))
+      if (is.null(x$meta$cifti$names)) {
+        x$meta$cifti$names <- paste("Column", seq(T_))
+      }
     }
 
     stopifnot(is.xifti(x))
@@ -321,10 +365,7 @@ convert_to_dscalar <- function(x, cifti_target_fname=NULL, names=NULL) {
   }
 }
 
-#' @describeIn convert_xifti
-#'
-#' Give the ".dtseries" intent (code 3002/ConnDenseSeries) to an input
-#'  \code{"xifti"} object. Can also be used to set the time metadata.
+#' @rdname convert_xifti
 #'
 #' @param x The CIFTI file name or \code{"xifti"} object to convert.
 #' @param cifti_target_fname File name for the converted CIFTI. Only used if
@@ -387,37 +428,4 @@ convert_to_dtseries <- function(
 
     return(cifti_target_fname)
   }
-}
-
-#' Convert the intent of a CIFTI file or \code{"xifti"} object
-#'
-#' @param x The CIFTI file name or \code{"xifti"} object to convert.
-#' @param to The desired intent: \code{"dscalar"} (default), \code{"dtseries"},
-#'  or \code{"dlabel"}
-#' @param cifti_target_fname File name for the converted CIFTI. Only used if
-#'  \code{x} is a CIFTI file name. If \code{NULL} (default), will use the same
-#'  name as \code{x} but with the extension updated.
-#' @param ... Only used if \code{x} is a \code{"xifti"} object. Additional
-#'  options specific to the target type and intent, e.g. for
-#'  \code{convert_to_dlabel}.
-#'
-#' @return If \code{x} is a CIFTI, the target is a \code{"dlabel"} and
-#'  \code{return_conversion_table}, a length-2 list with the first entry being
-#'  the ".dlabel" \code{"xifti"} and the second being the conversion table.
-#'  Otherwise, the \code{"xifti"} or the output CIFTI file name is directly
-#'  returned.
-#'
-#' @family manipulating xifti
-#'
-#' @export
-convert_xifti <- function(x, to=c("dscalar", "dtseries", "dlabel"),
-  cifti_target_fname=NULL, ...){
-
-  to <- match.arg(to, c("dscalar", "dtseries", "dlabel"))
-
-  switch(to,
-      dscalar = convert_to_dscalar(x, cifti_target_fname, ...),
-      dtseries = convert_to_dtseries(x, cifti_target_fname, ...),
-      dlabel = convert_to_dlabel(x, cifti_target_fname, ...)
-  )
 }

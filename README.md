@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# ciftiTools
+# ciftiTools <img src="man/figures/logo.png" align="right" height="139" alt="ciftiTools sticker" />
 
 <!-- badges: start -->
 
@@ -126,6 +126,7 @@ Manipulating `"xifti"` objects
 - `combine_xifti`: Combine `"xifti"`s with non-overlapping brain
   structures.
 - `convert_xifti`: Convert between dlabel, dscalar, and dtseries.
+- `impute_xifti`: Impute data values from neighboring vertices/voxels.
 - `merge_xifti`: Concatenate `"xifti"`s.
 - `move_from_mwall`: Convert the medial wall mask to a data value,
   deleting the mask.
@@ -156,58 +157,67 @@ See `NAMESPACE` for a full list of all exported functions.
 ## Illustrations
 
 <figure>
-<img src="README_media/ciftiTools_summary.png" style="width:65.0%"
+<img src="man/figures/ciftiTools_summary.jpg" style="width:65.0%"
 alt="ciftiTools graphical summary" />
 <figcaption aria-hidden="true">ciftiTools graphical summary</figcaption>
 </figure>
 
 <figure>
-<img src="README_media/xifti_structure.png" style="width:65.0%"
+<img src="man/figures/xifti_structure.jpg" style="width:65.0%"
 alt="“xifti” object structure" />
 <figcaption aria-hidden="true">“xifti” object structure</figcaption>
 </figure>
 
-<figure>
-<img src="README_media/surf_tour.gif" style="width:25.0%"
-alt="Surfaces comparison. The “very inflated”, “inflated”, and “midthickness” surfaces are included in ciftiTools through the function load_surf. See the data acknowledgement section at the bottom of this README." />
-<figcaption aria-hidden="true">Surfaces comparison. The “very inflated”,
-“inflated”, and “midthickness” surfaces are included in ciftiTools
-through the function <code>load_surf</code>. See the data
-acknowledgement section at the bottom of this README.</figcaption>
-</figure>
-
 ## FAQ
 
-#### Why is a CIFTI file that has been read in called a `"xifti"`?
+### Why is a CIFTI file that has been read in called a `"xifti"`?
 
 The `"xifti"` object is a general interface for not only CIFTI files,
 but also GIFTI and NIFTI files. For example, we can plot a surface
 GIFTI:
 
 ``` r
-xii <- as.xifti(surfL=read_surf(ciftiTools.files()$surf["left"]))
+gii_surf <- read_surf(ciftiTools.files()$surf["left"])
+xii <- as.xifti(surfL=gii_surf)
 plot(xii)
 ```
 
 We can also convert metric GIFTI files and/or NIFTI files to CIFTI files
 (or vice versa) using the `"xifti"` object as an intermediary.
 
-#### How do I visualize cortical data without applying shading to the mesh geometry?
+### How do I convert to CIFTI Format…
+
+#### …from NIFTI volumetric cortical data?
+
+The cortex data will have to be projected to the surface. There are
+options from other software packages including the [Connectome
+Workbench](https://www.humanconnectome.org/software/workbench-command/-volume-to-surface-mapping),
+[FreeSurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/mri_vol2surf),
+[ciftify](https://edickie.github.io/ciftify/#/03b_cifti-for-your_fmri),
+and
+[Nilearn](https://nilearn.github.io/stable/modules/generated/nilearn.surface.vol_to_surf.html).
+
+#### …from NIFTI volumetric subcortical data?
+
+Use the Connectome Workbench command
+[-cifti-create-dense-from-template](https://www.humanconnectome.org/software/workbench-command/-cifti-create-dense-from-template).
+
+### How do I visualize cortical data without applying shading to the mesh geometry?
 
 The 3D shading may make certain plots more difficult to interpret, if
-the color scale varies from light to dark: darker regions might be in a
-shadow, or their values might be higher. To skip shading, use the
+the color scale varies from dark to light: darker regions might be in a
+shadow, or their values might be lower. To skip shading, use the
 argument `material=list(lit=FALSE)` to `view_xifti_surface`.
 
-<img src="README_media/vxs_lit.png" style="width:14.0%"
+<img src="man/figures/vxs_lit.jpg" style="width:20.0%"
 alt="Lit surface plot" />
-<img src="README_media/vxs_unlit.png" style="width:14.0%"
+<img src="man/figures/vxs_unlit.jpg" style="width:20.0%"
 alt="Unlit surface plot" />
 
-#### How do I get `VoxelIndicesIJK` or the MNI coordinates for the subcortex?
+### How do I get `VoxelIndicesIJK` or the MNI coordinates for the subcortex?
 
 For a `"xifti"` object `xii` with subcortical data, the mask of data
-locations are saved in `xii$meta$subcort$mask`. To obtain the array
+locations is saved in `xii$meta$subcort$mask`. To obtain the array
 coordinates of the in-mask locations, use
 `which(xii$meta$subcort$mask, arr.ind=TRUE) - 1`. This matrix has each
 subcortical voxel along the rows, and its I, J, and K array coordinates

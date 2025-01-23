@@ -4,7 +4,7 @@
 \alias{newdata_xifti}
 \title{Replace the data in a \code{"xifti"}}
 \usage{
-newdata_xifti(xifti, newdata, newnames = NULL)
+newdata_xifti(xifti, newdata, newnames = NULL, subcortex_by_bs = FALSE)
 }
 \arguments{
 \item{xifti}{A \code{"xifti"} object.}
@@ -24,6 +24,12 @@ Can also be a length-one vector to set all values equally.}
 (default), keep the original names, except if the number of columns
 in \code{newdata} doesn't match that of \code{xifti}, in which case
 no names will be used.}
+
+\item{subcortex_by_bs}{If subcortical data is being provided in
+\code{newdata}, are the locations ordered by brain structure? Default:
+\code{FALSE}. The \code{"xifti"} data matrix is not ordered by brain
+structure, but CIFTI files and most other CIFTI packages do sort subcortical
+data by brain structure first, and then array index second.}
 }
 \value{
 The new \code{"xifti"}
@@ -43,7 +49,8 @@ Other manipulating xifti:
 \code{\link{apply_parc}()},
 \code{\link{apply_xifti}()},
 \code{\link{combine_xifti}()},
-\code{\link{convert_to_dlabel}()},
+\code{\link{convert_xifti}()},
+\code{\link{impute_xifti}()},
 \code{\link{merge_xifti}()},
 \code{\link{move_to_mwall}()},
 \code{\link{move_to_submask}()},

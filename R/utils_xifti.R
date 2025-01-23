@@ -338,12 +338,20 @@ dim.xifti <- function(x) {
 #'  brainstructure along the rows. Surfaces and metadata are discarded.
 #'
 #' @inheritParams x_Param_xifti
+#' @param subcortex_by_bs If subcortical data exists in \code{x}, should the
+#'  resulting matrix order locations by brain structure? Default: \code{FALSE}.
+#'  If \code{TRUE}, subcortex locations will be sorted by brain structure first,
+#'  and then array index second.
 #' @param ... Unused
 #' @return The input as a matrix. Each brainstructure's data is concatenated.
 #'
 #' @export
 #' @method as.matrix xifti
-as.matrix.xifti <- function(x, ...) {
+as.matrix.xifti <- function(x, subcortex_by_bs=FALSE, ...) {
+  if (!is.null(x$data$subcort) && subcortex_by_bs) {
+    x$data$subcort <- x$data$subcort[order(x$meta$subcort$labels),,drop=FALSE]
+  }
+  
   do.call(rbind, x$data)
 }
 
