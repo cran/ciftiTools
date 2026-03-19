@@ -139,7 +139,7 @@ Manipulating `"xifti"` objects
 - `smooth_xifti`: Smooth the data along the surface.
 - `transform_xifti`: Apply a vectorizable function.
 
-Surface gemoetry
+Surface geometry
 
 - `load_surf`: Load a surface geometry included in the package.
 - `read_surf`: Read in a GIFTI surface geometry file as a `"surf"`
@@ -267,6 +267,17 @@ these labels, but this error has since been corrected. See the
 - xml files: [`xml2`](https://CRAN.R-project.org/package=xml2)
 - Interactive 3D rendering:
   [`rgl`](https://CRAN.R-project.org/package=rgl)
+
+## Surface rendering issue on Mac OS Tahoe
+
+On Mac OS Tahoe, Open GL windows will not work due to a problem with
+`rgl` and XQuartz
+(<https://github.com/dmurdoch/rgl/issues/488#issuecomment-3506547361>).
+To render the cortical surface with `plot` or `view_xifti_surface`, you
+will need to choose to use the htmlwidget instead of the Open GL window.
+Set `widget=TRUE` for interactive viewing, and set `fname="*.html"` to
+write files. The `ciftiTools` development team is currently exploring
+workarounds for this issue.
 
 ## Data acknowledgement
 
